@@ -1,0 +1,43 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/cineforge
+      PORT: 4000
+      APP_URL: http://localhost:4000
+      API_URL: http://localhost:4000
+      WEB_URL: http://localhost:3000
+      JWT_ACCESS_SECRET: local-access-secret-change-this-32chars
+      JWT_REFRESH_SECRET: local-refresh-secret-change-this-32chars
+      COOKIE_SECRET: local-cookie-secret-change-this-32chars
+      ADMIN_EMAIL: admin@cineforge.ai
+      ADMIN_PASSWORD: Happy0808
+    ports:
+      - "4000:4000"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_WEB_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+
+volumes:
+  mongo_data:

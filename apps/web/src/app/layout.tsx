@@ -1,0 +1,22 @@
+import type { Metadata } from 'next';
+import './globals.css';
+
+export const metadata: Metadata = {
+  title: 'CineForge AI - 10 Lakh+ AI Prompt Bundle',
+  description: 'Google Gemini, Midjourney, Sora, DALL-E and creator-ready AI image and video prompt bundle.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'),
+  openGraph: {
+    title: 'CineForge AI Prompt Vault',
+    description: 'Ready-to-copy prompt vault for creators, agencies, freelancers and businesses.',
+    type: 'website'
+  },
+  robots: { index: true, follow: true }
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
