@@ -25,10 +25,17 @@ Requires authentication.
 Card fields include `adminName`, `cardType`, `title`, `description`, `videoUrl`, `recommendedWidth`, `recommendedHeight`, `targetSlot`, `imageFit` and `sortOrder`.
 
 ## Commerce
+- `POST /api/create-order`
+- `POST /api/verify-payment`
+- `GET /api/order-status/:orderCode`
 - `GET /api/commerce/offers`
 - `POST /api/commerce/orders`
 - `GET /api/commerce/orders`
 - `PATCH /api/commerce/orders/:id/status`
+
+`/api/create-order` creates a pending/payment_started order and returns `eventId`, `checkoutUrl`, `successRedirectUrl`, and `webhookUrl`.
+
+`/api/verify-payment` must be called by the payment provider webhook or verified server process. In production, set `PAYMENT_WEBHOOK_SECRET` and send it as `x-webhook-secret`. Purchase tracking is sent only after this endpoint verifies `status=paid` and amount matches the saved order.
 
 ## Marketing
 - `POST /api/marketing/track`
@@ -37,3 +44,10 @@ Card fields include `adminName`, `cardType`, `title`, `description`, `videoUrl`,
 - `POST /api/marketing/scripts`
 
 Recommended DataLayer events: `page_view`, `CTA_click`, `button_click`, `form_start`, `form_submit`, `add_to_cart`, `initiate_checkout`, `purchase`, `thank_you_page`, `whatsapp_click`, `phone_click`, `email_click`, `scroll_depth`, `video_play`, `lead_generated`, `section_view`.
+
+Meta Pixel browser events:
+- `PageView` on site load.
+- `ViewContent` on landing page.
+- `InitiateCheckout` on purchase CTA/payment start.
+- `AddPaymentInfo` after server order creation.
+- `Purchase` only on `/thank-you?paid=1` after `/api/order-status/:orderCode` returns verified.

@@ -16,7 +16,10 @@ export default function AdminDashboardPage() {
             <p className="text-sm font-black uppercase tracking-[0.24em] text-cyan">Admin panel</p>
             <h1 className="mt-2 text-4xl font-black text-shine">CineForge Control Room</h1>
           </div>
-          <a href="/" className="rounded-full border border-white/15 px-5 py-3 font-bold">View Website</a>
+          <div className="flex gap-3">
+            <a href="/admin/settings" className="rounded-full bg-neon px-5 py-3 font-black text-ink">Settings</a>
+            <a href="/" className="rounded-full border border-white/15 px-5 py-3 font-bold">View Website</a>
+          </div>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {modules.map(([title, desc]) => (

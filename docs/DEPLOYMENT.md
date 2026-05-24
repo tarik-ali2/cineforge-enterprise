@@ -22,6 +22,22 @@ Change this password immediately after first production login.
 4. Deploy API first, then run `npm run seed --workspace apps/api` from Render shell.
 5. Deploy web and point your domain through Cloudflare.
 
+## Payment + Meta Tracking Setup
+Set these before launch:
+- `PAYMENT_PROVIDER=external` or your provider key.
+- `EXTERNAL_CHECKOUT_URL` with a checkout that supports success redirect and webhook.
+- `PAYMENT_SUCCESS_REDIRECT_URL=https://yourdomain.com/thank-you?paid=1`
+- `PAYMENT_WEBHOOK_SECRET` and configure the provider webhook to call `https://api.yourdomain.com/api/verify-payment`.
+- `NEXT_PUBLIC_META_PIXEL_ID`, `META_PIXEL_ID`, `META_CAPI_ACCESS_TOKEN`.
+- Optional test mode: `META_TEST_EVENT_CODE` from Meta Events Manager Test Events.
+
+Test checklist:
+1. Open landing page with UTM params and confirm `PageView` + `ViewContent` in Meta Test Events.
+2. Click Buy/Pay and confirm `InitiateCheckout`.
+3. Create a test order and confirm `AddPaymentInfo`.
+4. Send a test webhook to `/api/verify-payment` with the exact order amount.
+5. Open `/thank-you?paid=1&order=ORDER_CODE&event_id=EVENT_ID` and confirm Purchase appears once with browser/server deduplication.
+
 ## PM2 + Nginx
 1. Build: `npm run build`
 2. Start: `pm2 start infra/ecosystem.config.cjs`

@@ -16,15 +16,23 @@ const orderSchema = new Schema({
   email: { type: String, required: true, index: true },
   phone: String,
   amount: { type: Number, required: true },
+  currency: { type: String, default: 'INR' },
   items: [Schema.Types.Mixed],
-  paymentMethod: { type: String, enum: ['upi_manual', 'payment_link'], default: 'upi_manual' },
-  status: { type: String, enum: ['pending', 'submitted', 'approved', 'rejected'], default: 'pending', index: true },
+  paymentMethod: { type: String, enum: ['upi_manual', 'payment_link', 'external', 'razorpay', 'instamojo', 'stripe'], default: 'external' },
+  paymentProvider: String,
+  status: { type: String, enum: ['pending', 'payment_started', 'submitted', 'approved', 'rejected', 'paid', 'failed'], default: 'pending', index: true },
+  eventId: { type: String, index: true },
+  transactionId: { type: String, index: true },
+  successRedirectUrl: String,
+  checkoutUrl: String,
+  utm: Schema.Types.Mixed,
   utrNumber: String,
   proofMediaId: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
   downloadTokenHash: String,
-  approvedAt: Date
+  approvedAt: Date,
+  verifiedAt: Date,
+  metaPurchaseSentAt: Date
 }, { timestamps: true });
 
 export const CheckoutOffer = model('CheckoutOffer', offerSchema);
 export const Order = model('Order', orderSchema);
-

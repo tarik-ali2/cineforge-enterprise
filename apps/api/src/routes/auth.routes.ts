@@ -99,7 +99,7 @@ authRouter.post('/change-password', async (req, res, next) => {
     const payload = verifyAccessToken(token);
     const body = z.object({ currentPassword: z.string(), newPassword: z.string().min(8) }).parse(req.body);
     const user = await User.findById(payload.sub);
-    if (!user || !(await bcrypt.compare(body.currentPassword, user.passwordHash))) {
+    if (!user || !(await bcrypt.compare(body.currentPassword, String(user.passwordHash)))) {
       return res.status(401).json({ error: 'Invalid current password' });
     }
     user.passwordHash = await bcrypt.hash(body.newPassword, 12);

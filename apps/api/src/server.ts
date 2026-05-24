@@ -30,6 +30,7 @@ async function bootstrap() {
   app.use('/api/admin', adminRouter);
   app.use('/api/cms', cmsRouter);
   app.use('/api/commerce', commerceRouter);
+  app.use('/api', commerceRouter);
   app.use('/api/marketing', marketingRouter);
 
   app.use(notFound);

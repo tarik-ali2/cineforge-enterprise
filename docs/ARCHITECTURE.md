@@ -9,6 +9,7 @@
 ## Core Modules
 - Landing CMS: editable pages, hero sections, cards, media slots, testimonials and pricing.
 - Commerce: checkout offers, order capture, payment status, secure PDF delivery flow.
+- Verified tracking: order creation, payment webhook verification, thank-you success redirect, Meta Pixel and Conversions API deduplication.
 - Admin: login, RBAC roles, custom permissions, settings, tracking scripts, analytics summaries.
 - Marketing: GTM/GA4/Meta/remarketing custom scripts, DataLayer events and UTM/session tracking.
 - SEO: per-page metadata, canonical, robots, schema type, future sitemap/robots generation.

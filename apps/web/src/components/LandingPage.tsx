@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, Sparkles, Timer, Video } from 'lucide-react';
 import Image from 'next/image';
-import { track } from '@/lib/api';
+import { track } from '@/lib/tracking';
 import { TrackingBridge } from './TrackingBridge';
 
 const tools = ['Gemini', 'Midjourney', 'Sora', 'DALL-E', 'Leonardo', 'Google Flow', 'HeyGen', 'InVideo', 'Claude AI', 'GPT'];
@@ -38,7 +38,7 @@ export function LandingPage() {
           <a href="#courses">Courses</a>
           <a href="#reviews">Reviews</a>
         </div>
-        <a href="/checkout" className="rounded-full bg-neon px-5 py-3 text-sm font-black text-ink shadow-glow">Buy ₹199</a>
+        <a onClick={() => track('initiate_checkout', { source: 'nav_buy', value: 199, currency: 'INR', productName: 'CineForge AI Prompt Bundle' })} href="/checkout" className="rounded-full bg-neon px-5 py-3 text-sm font-black text-ink shadow-glow">Buy Rs.199</a>
       </nav>
 
       <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-8 lg:grid-cols-[1.1fr_.9fr]">
@@ -61,7 +61,7 @@ export function LandingPage() {
             ))}
           </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a onClick={() => track('CTA_click', { cta: 'hero_buy' })} href="/checkout" className="inline-flex items-center justify-center gap-2 rounded-full bg-neon px-7 py-4 font-black text-ink">
+            <a onClick={() => track('initiate_checkout', { source: 'hero_buy', value: 199, currency: 'INR', productName: 'CineForge AI Prompt Bundle' })} href="/checkout" className="inline-flex items-center justify-center gap-2 rounded-full bg-neon px-7 py-4 font-black text-ink">
               Get Full Bundle <ArrowRight size={18} />
             </a>
             <a href="#vault" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-7 py-4 font-bold text-white">
@@ -73,7 +73,7 @@ export function LandingPage() {
           <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top,#2448ff,transparent_35%),linear-gradient(135deg,#0a102b,#201044)]">
             <Image src="/digital-products.png" alt="CineForge AI prompt bundle product cover" fill priority className="object-cover" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-neon/30 bg-black/68 p-4 backdrop-blur">
-              <p className="text-2xl font-black text-neon">₹199 Only</p>
+              <p className="text-2xl font-black text-neon">Rs.199 Only</p>
               <p className="text-sm font-bold text-white/75">10 Lakh+ prompts, courses and bonuses</p>
             </div>
           </div>
@@ -148,11 +148,11 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-3 font-black">
             <Timer className="text-neon" />
-            <span className="text-white/50 line-through">₹2999</span>
-            <span className="text-2xl text-neon">₹199</span>
+            <span className="text-white/50 line-through">Rs.2999</span>
+            <span className="text-2xl text-neon">Rs.199</span>
             <span className="rounded-full bg-magenta px-3 py-1 text-xs">10 min offer</span>
           </div>
-          <a href="/checkout" className="w-full rounded-full bg-neon px-6 py-3 text-center font-black text-ink sm:w-auto">Buy Now</a>
+          <a onClick={() => track('initiate_checkout', { source: 'sticky_buy', value: 199, currency: 'INR', productName: 'CineForge AI Prompt Bundle' })} href="/checkout" className="w-full rounded-full bg-neon px-6 py-3 text-center font-black text-ink sm:w-auto">Buy Now</a>
         </div>
       </div>
     </main>

@@ -20,9 +20,15 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional().default('CineForge AI <noreply@example.com>'),
   UPI_ID: z.string().optional().default(''),
   UPI_NAME: z.string().optional().default('CineForge AI'),
-  PDF_SECURE_STORAGE_PATH: z.string().optional().default('./storage/private')
+  PDF_SECURE_STORAGE_PATH: z.string().optional().default('./storage/private'),
+  PAYMENT_PROVIDER: z.enum(['manual_upi', 'external', 'razorpay', 'instamojo', 'stripe']).optional().default('external'),
+  EXTERNAL_CHECKOUT_URL: z.string().optional().default(''),
+  PAYMENT_SUCCESS_REDIRECT_URL: z.string().url().optional(),
+  PAYMENT_WEBHOOK_SECRET: z.string().optional().default(''),
+  META_PIXEL_ID: z.string().optional().default(''),
+  META_CAPI_ACCESS_TOKEN: z.string().optional().default(''),
+  META_TEST_EVENT_CODE: z.string().optional().default('')
 });
 
 export const env = envSchema.parse(process.env);
 export const isProduction = env.NODE_ENV === 'production';
-

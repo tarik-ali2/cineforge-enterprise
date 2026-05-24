@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { track } from '@/lib/api';
+import { initMarketing, track } from '@/lib/tracking';
 
 export function TrackingBridge() {
   useEffect(() => {
-    const id = localStorage.getItem('cf_session') ?? crypto.randomUUID();
-    localStorage.setItem('cf_session', id);
-    track('page_view', { sessionId: id });
+    initMarketing();
+    track('page_view');
+    if (window.location.pathname === '/') track('view_content', { productName: 'CineForge AI Prompt Bundle' });
 
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;

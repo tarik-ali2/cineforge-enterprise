@@ -22,7 +22,7 @@ export async function buildAuthPayload(userId: string) {
 export async function login(email: string, password: string, context: { ipHash?: string; userAgent?: string }) {
   const user = await User.findOne({ email: email.toLowerCase(), status: 'active' });
   if (!user) throw new Error('Invalid credentials');
-  const ok = await bcrypt.compare(password, user.passwordHash);
+  const ok = await bcrypt.compare(password, String(user.passwordHash));
   if (!ok) throw new Error('Invalid credentials');
   const payload = await buildAuthPayload(String(user._id));
   const sessionId = nanoid(32);

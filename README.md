@@ -18,6 +18,10 @@ Seed creates:
 
 Change it immediately after first login.
 
+## Payment Tracking Rule
+
+Purchase events are not fired on button click. The frontend creates an order through `/api/create-order`, redirects to a payment checkout that must support success redirect/webhook, and only fires Purchase on `/thank-you?paid=1` after `/api/order-status/:orderCode` confirms verified payment. The backend can also send Meta Conversions API Purchase from `/api/verify-payment`.
+
 ## Quick Start
 
 ```bash
@@ -35,4 +39,3 @@ npm run start
 ```
 
 See `docs/DEPLOYMENT.md`.
-
