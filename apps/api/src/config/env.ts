@@ -13,6 +13,7 @@ const envSchema = z.object({
   COOKIE_SECRET: z.string().min(32),
   ADMIN_EMAIL: z.string().email(),
   ADMIN_PASSWORD: z.string().min(8),
+  BOOTSTRAP_SECRET: z.string().optional().default(''),
   SMTP_HOST: z.string().optional().default(''),
   SMTP_PORT: z.coerce.number().optional().default(587),
   SMTP_USER: z.string().optional().default(''),

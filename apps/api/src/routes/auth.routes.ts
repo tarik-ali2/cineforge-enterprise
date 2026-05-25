@@ -3,13 +3,37 @@ import { nanoid } from 'nanoid';
 import { Router } from 'express';
 import { z } from 'zod';
 import { env, isProduction } from '../config/env.js';
+import { Role } from '../models/Role.js';
 import { Session } from '../models/Session.js';
 import { User } from '../models/User.js';
-import { buildAuthPayload, login } from '../services/auth.service.js';
+import { buildAuthPayload, ensureDefaultRoles, login } from '../services/auth.service.js';
 import { publicIpHash, sha256 } from '../utils/crypto.js';
 import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken } from '../utils/tokens.js';
 
 export const authRouter = Router();
+
+authRouter.post('/bootstrap-admin', async (req, res, next) => {
+  try {
+    const body = z.object({ secret: z.string().min(8).optional() }).parse(req.body);
+    if (!env.BOOTSTRAP_SECRET || body.secret !== env.BOOTSTRAP_SECRET) {
+      return res.status(401).json({ error: 'Invalid bootstrap secret' });
+    }
+    const existing = await User.countDocuments();
+    if (existing > 0) return res.status(409).json({ error: 'Admin already exists' });
+
+    await ensureDefaultRoles();
+    const superAdmin = await Role.findOne({ key: 'super_admin' });
+    if (!superAdmin) throw new Error('Super Admin role missing');
+    await User.create({
+      name: 'CineForge Owner',
+      email: env.ADMIN_EMAIL.toLowerCase(),
+      passwordHash: await bcrypt.hash(env.ADMIN_PASSWORD, 12),
+      roles: [superAdmin._id],
+      status: 'active'
+    });
+    res.status(201).json({ ok: true, email: env.ADMIN_EMAIL });
+  } catch (error) { next(error); }
+});
 
 authRouter.post('/login', async (req, res, next) => {
   try {
