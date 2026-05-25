@@ -38,8 +38,8 @@ async function seed() {
         type: 'homepage',
         status: 'published',
         seo: {
-          metaTitle: 'CineForge AI - 10 Lakh+ Google Gemini Prompt Bundle',
-          metaDescription: 'Ready-to-copy AI image and video prompts for creators, agencies, freelancers and business owners.',
+          metaTitle: 'CineForge AI - 10 Hajar+ AI Prompt Bundle + AI Course',
+          metaDescription: 'Ready-to-copy AI image and video prompts plus recorded AI course for creators, agencies, freelancers and business owners.',
           focusKeywords: ['Gemini prompts', 'AI video prompts', 'prompt bundle'],
           robots: 'index,follow',
           schemaType: 'Product'
@@ -83,7 +83,7 @@ async function seed() {
   }
 
   const offers: Array<[string, number, boolean]> = [
-    ['10 Lakh+ AI Prompt Bundle', 199, true],
+    ['10 Hajar+ AI Prompt Bundle + AI Course', 199, true],
     ['100,000 ChatGPT Prompts Bundle', 149, true],
     ['AI and Machine Learning Course', 147, true]
   ];

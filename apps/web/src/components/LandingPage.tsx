@@ -47,11 +47,11 @@ export function LandingPage() {
             India's digital creator prompt vault
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="max-w-4xl text-5xl font-black leading-[0.95] md:text-7xl">
-            <span className="text-shine">10 Lakh+ Google Gemini</span><br />
-            Image & Video Creation Prompt Bundle
+            <span className="text-shine">10 Hajar+ AI Prompts</span><br />
+            Image & Video Creation Bundle + AI Course
           </motion.h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/74">
-            Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories. Creators, agencies, freelancers aur business owners ke liye ek complete prompt system.
+            Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {tools.map((tool, index) => (
@@ -74,7 +74,7 @@ export function LandingPage() {
             <Image src="/digital-products.png" alt="CineForge AI prompt bundle product cover" fill priority className="object-cover" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-neon/30 bg-black/68 p-4 backdrop-blur">
               <p className="text-2xl font-black text-neon">Rs.199 Only</p>
-              <p className="text-sm font-bold text-white/75">10 Lakh+ prompts, courses and bonuses</p>
+              <p className="text-sm font-bold text-white/75">10 Hajar+ prompts, AI course and bonuses</p>
             </div>
           </div>
         </div>

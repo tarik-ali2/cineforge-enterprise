@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CineForge AI - 10 Lakh+ AI Prompt Bundle',
-  description: 'Google Gemini, Midjourney, Sora, DALL-E and creator-ready AI image and video prompt bundle.',
+  title: 'CineForge AI - 10 Hajar+ AI Prompt Bundle + AI Course',
+  description: 'Google Gemini, Midjourney, Sora, DALL-E prompt bundle plus recorded AI course for creators.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_WEB_URL ?? 'http://localhost:3000'),
   openGraph: {
     title: 'CineForge AI Prompt Vault',

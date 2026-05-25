@@ -6,7 +6,7 @@ import { API_URL } from '@/lib/api';
 import { getStoredUtm, track } from '@/lib/tracking';
 
 const defaultOffers = [
-  { id: 'bundle', name: '10 Lakh+ AI Prompt Bundle', price: 199, detail: 'Gemini image and video prompt categories with lifetime access.' },
+  { id: 'bundle', name: '10 Hajar+ AI Prompt Bundle + AI Course', price: 199, detail: 'Gemini image and video prompt categories plus recorded AI course with lifetime access.' },
   { id: 'chatgpt', name: '100,000 ChatGPT Prompts Bundle', price: 149, detail: 'Smart work prompt library for creators and hustlers.' },
   { id: 'course', name: 'AI and Machine Learning Course', price: 147, detail: 'Beginner-friendly recorded course with practical learning path.' }
 ];
