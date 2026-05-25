@@ -71,7 +71,7 @@ export function LandingPage() {
         </div>
         <div className="rounded-[2rem] border border-white/15 bg-white/8 p-4 shadow-glow">
           <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top,#2448ff,transparent_35%),linear-gradient(135deg,#0a102b,#201044)]">
-            <Image src="/digital-products.png" alt="CineForge AI prompt bundle product cover" fill priority className="object-cover" />
+            <Image src="/cineforge-ai-bundle.png" alt="CineForge AI 10 hajar prompt bundle and AI agent course" fill priority className="object-cover" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-neon/30 bg-black/68 p-4 backdrop-blur">
               <p className="text-2xl font-black text-neon">Rs.199 Only</p>
               <p className="text-sm font-bold text-white/75">10 Hajar+ prompts, AI course and bonuses</p>
