@@ -1,7 +1,7 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const sessionSchema = new Schema({
-  userId: { type: Types.ObjectId, ref: 'User', required: true, index: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   refreshTokenHash: { type: String, required: true, index: true },
   deviceId: { type: String, required: true },
   deviceName: String,
@@ -12,4 +12,3 @@ const sessionSchema = new Schema({
 }, { timestamps: true });
 
 export const Session = model('Session', sessionSchema);
-
