@@ -96,7 +96,7 @@ export function LandingPage() {
             India's digital creator prompt vault
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="max-w-4xl text-5xl font-black leading-[0.95] md:text-7xl">
-            <span className="text-shine">10 Hajar+ AI Prompts</span><br />
+            <span className="text-shine">10k + AI Agent</span><br />
             Image & Video Creation Bundle + AI Course
           </motion.h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-white/74">
