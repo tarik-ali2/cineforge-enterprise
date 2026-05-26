@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, CheckCircle2, Sparkles, Timer, Video } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, Sparkles, Timer, Video } from 'lucide-react';
 import Image from 'next/image';
+import { useRef } from 'react';
 import { track } from '@/lib/tracking';
 import { TrackingBridge } from './TrackingBridge';
 
@@ -14,6 +15,29 @@ const courses = [
   ['ChatGPT Power Course', '25 recorded videos']
 ];
 const testimonials = ['Rahul Sharma', 'Priya Mehta', 'Arjun Verma', 'Neha Kapoor'];
+const showcaseVideos = [
+  { title: 'Cinematic Product Reel', tag: 'Gemini Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'AI Avatar Promo', tag: 'HeyGen + GPT Script', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Faceless Shorts Pack', tag: 'Sora/Reel Format', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Business Ad Reel', tag: 'InVideo Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Viral Hook Video', tag: 'Creator Script Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Offer Promo Reel', tag: 'Sales Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+];
+const courseVideos = [
+  { title: 'ChatGPT Mastery', tag: '62 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Prompt Engineering', tag: '33 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'SaaS ChatGPT Course', tag: '33 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+];
+const imageCards = [
+  'Google Gemini Image Prompts',
+  'Video Creation Prompts',
+  'Reels & Shorts Hooks',
+  'Product Ad Creatives',
+  'YouTube Thumbnail Prompts',
+  'Business Poster Prompts',
+  'AI Avatar Script Prompts',
+  'Automation Templates'
+];
 const toolStyles = [
   'from-[#2563eb] via-[#7c3aed] to-[#facc15] text-white border-[#facc15]/60',
   'from-[#020617] via-[#334155] to-[#e0f2fe] text-white border-white/30',
@@ -27,7 +51,32 @@ const toolStyles = [
   'from-[#073b31] via-[#10b981] to-[#c6fff2] text-[#041c16] border-[#c6fff2]/60'
 ];
 
+function useCarousel() {
+  const ref = useRef<HTMLDivElement>(null);
+  const slide = (direction: 'left' | 'right') => {
+    ref.current?.scrollBy({ left: direction === 'left' ? -360 : 360, behavior: 'smooth' });
+  };
+  return { ref, slide };
+}
+
+function CarouselControls({ onLeft, onRight }: { onLeft: () => void; onRight: () => void }) {
+  return (
+    <div className="flex gap-2">
+      <button type="button" onClick={onLeft} aria-label="Previous cards" className="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition hover:border-cyan hover:bg-cyan/15 hover:text-cyan">
+        <ChevronLeft size={20} />
+      </button>
+      <button type="button" onClick={onRight} aria-label="Next cards" className="grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/10 text-white transition hover:border-cyan hover:bg-cyan/15 hover:text-cyan">
+        <ChevronRight size={20} />
+      </button>
+    </div>
+  );
+}
+
 export function LandingPage() {
+  const primaryVideos = useCarousel();
+  const courseVideoCarousel = useCarousel();
+  const imageCarousel = useCarousel();
+
   return (
     <main className="premium-bg min-h-screen overflow-hidden pb-28">
       <TrackingBridge />
@@ -80,6 +129,30 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section id="videos" className="mx-auto max-w-7xl px-5 py-10">
+        <div className="mb-5 flex items-end justify-between gap-5">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan">Video prompt showcase</p>
+            <h2 className="mt-2 text-4xl font-black">Reel format video cards</h2>
+            <p className="mt-3 max-w-2xl text-white/62">Short-form examples for product ads, avatar promos, faceless content and viral offer videos.</p>
+          </div>
+          <CarouselControls onLeft={() => primaryVideos.slide('left')} onRight={() => primaryVideos.slide('right')} />
+        </div>
+        <div ref={primaryVideos.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {showcaseVideos.map((video) => (
+            <article key={video.title} className="min-w-[210px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.24)] sm:min-w-[250px]">
+              <div className="relative aspect-[9/16] bg-black">
+                <iframe src={video.url} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" />
+                <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-xl bg-black/65 p-3 backdrop-blur">
+                  <p className="text-sm font-black text-white">{video.title}</p>
+                  <p className="mt-1 text-xs font-bold text-neon">{video.tag}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section id="vault" className="mx-auto max-w-7xl px-5 py-10">
         <div className="mb-5 flex items-end justify-between gap-5">
           <div>
@@ -118,6 +191,53 @@ export function LandingPage() {
               <p key={bonus} className="flex items-center gap-2"><CheckCircle2 className="text-cyan" size={18} /> {bonus}</p>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-10">
+        <div className="mb-5 flex items-end justify-between gap-5">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan">Recorded classes preview</p>
+            <h2 className="mt-2 text-4xl font-black">Course video cards</h2>
+          </div>
+          <CarouselControls onLeft={() => courseVideoCarousel.slide('left')} onRight={() => courseVideoCarousel.slide('right')} />
+        </div>
+        <div ref={courseVideoCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {courseVideos.map((video) => (
+            <article key={video.title} className="min-w-[215px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 sm:min-w-[260px]">
+              <div className="relative aspect-[9/16] bg-gradient-to-br from-cyan/25 via-black to-magenta/20">
+                <iframe src={video.url} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" />
+                <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-xl bg-black/70 p-3 backdrop-blur">
+                  <p className="text-sm font-black text-white">{video.title}</p>
+                  <p className="mt-1 text-xs font-bold text-cyan">{video.tag}</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-10">
+        <div className="mb-5 flex items-end justify-between gap-5">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan">Prompt bundle images</p>
+            <h2 className="mt-2 text-4xl font-black">8 image cards</h2>
+          </div>
+          <CarouselControls onLeft={() => imageCarousel.slide('left')} onRight={() => imageCarousel.slide('right')} />
+        </div>
+        <div ref={imageCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {imageCards.map((title, index) => (
+            <article key={title} className="min-w-[260px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.22)] sm:min-w-[310px]">
+              <div className="relative aspect-[4/5]">
+                <Image src={index % 2 === 0 ? '/cineforge-ai-bundle.png' : '/digital-products.png'} alt={title} fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
+                <div className="absolute left-4 right-4 bottom-4">
+                  <p className="inline-flex items-center gap-2 rounded-full bg-neon px-3 py-1 text-xs font-black text-ink"><PlayCircle size={14} /> Prompt Set</p>
+                  <h3 className="mt-3 text-xl font-black leading-tight text-white">{title}</h3>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
