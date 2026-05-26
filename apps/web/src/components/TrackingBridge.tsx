@@ -5,9 +5,10 @@ import { initMarketing, track } from '@/lib/tracking';
 
 export function TrackingBridge() {
   useEffect(() => {
-    initMarketing();
-    track('page_view');
-    if (window.location.pathname === '/') track('view_content', { productName: 'CineForge AI Prompt Bundle' });
+    initMarketing().then(() => {
+      track('page_view');
+      if (window.location.pathname === '/') track('view_content', { productName: 'CineForge AI Prompt Bundle' });
+    });
 
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;

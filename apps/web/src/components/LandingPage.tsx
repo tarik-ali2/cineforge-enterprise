@@ -5,7 +5,6 @@ import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, Sparkl
 import Image from 'next/image';
 import { useRef } from 'react';
 import { track } from '@/lib/tracking';
-import { TrackingBridge } from './TrackingBridge';
 
 const tools = ['Gemini', 'Midjourney', 'Sora', 'DALL-E', 'Leonardo', 'Google Flow', 'HeyGen', 'InVideo', 'Claude AI', 'GPT'];
 const courses = [
@@ -79,7 +78,6 @@ export function LandingPage() {
 
   return (
     <main className="premium-bg min-h-screen overflow-hidden pb-28">
-      <TrackingBridge />
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
         <a href="/" className="text-2xl font-black tracking-wide text-shine">CineForge AI</a>
         <div className="hidden gap-7 text-sm text-white/70 md:flex">

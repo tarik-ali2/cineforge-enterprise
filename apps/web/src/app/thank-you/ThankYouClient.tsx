@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { API_URL } from '@/lib/api';
-import { track } from '@/lib/tracking';
+import { initMarketing, track } from '@/lib/tracking';
 
 export function ThankYouClient() {
   const searchParams = useSearchParams();
@@ -25,6 +25,7 @@ export function ThankYouClient() {
       }
       const order = await response.json();
       if (order.verified) {
+        await initMarketing();
         track('purchase', {
           value: order.amount,
           currency: order.currency ?? 'INR',
