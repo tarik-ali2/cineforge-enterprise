@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "npm run build --workspace apps/api"
   publish = "apps/web/out"
   functions = "netlify/functions"
 
