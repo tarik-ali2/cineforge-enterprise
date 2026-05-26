@@ -1,3 +1,5 @@
+import { AdminNav } from '@/components/AdminNav';
+
 const modules = [
   ['Landing CMS', 'Hero, headline, CTA, prompt cards, video cards, course cards and testimonials.'],
   ['Media Library', 'Image/video uploads with admin name, target slot, recommended width and height.'],
@@ -9,16 +11,13 @@ const modules = [
 
 export default function AdminDashboardPage() {
   return (
-    <main className="min-h-screen bg-[#070816] px-5 py-8 text-white">
-      <section className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-[#070816] text-white">
+      <AdminNav />
+      <section className="mx-auto max-w-7xl px-5 py-8">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-black uppercase tracking-[0.24em] text-cyan">Admin panel</p>
             <h1 className="mt-2 text-4xl font-black text-shine">CineForge Control Room</h1>
-          </div>
-          <div className="flex gap-3">
-            <a href="/admin/settings" className="rounded-full bg-neon px-5 py-3 font-black text-ink">Settings</a>
-            <a href="/" className="rounded-full border border-white/15 px-5 py-3 font-bold">View Website</a>
           </div>
         </div>
         <div className="mt-8 grid gap-4 md:grid-cols-3">

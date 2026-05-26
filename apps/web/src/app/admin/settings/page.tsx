@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { AdminNav } from '@/components/AdminNav';
 
 const fields = [
   ['product', 'name', 'CineForge AI Prompt Bundle'],
@@ -32,8 +33,9 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#070816] px-5 py-8 text-white">
-      <section className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-[#070816] text-white">
+      <AdminNav />
+      <section className="mx-auto max-w-5xl px-5 py-8">
         <p className="text-sm font-black uppercase tracking-[0.24em] text-cyan">Launch settings</p>
         <h1 className="mt-2 text-4xl font-black text-shine">Payment, Pixel and Product Controls</h1>
         <div className="mt-8 grid gap-4">

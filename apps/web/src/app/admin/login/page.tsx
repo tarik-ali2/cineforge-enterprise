@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { AdminNav } from '@/components/AdminNav';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('admin@cineforge.ai');
@@ -21,10 +22,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="premium-bg grid min-h-screen place-items-center px-4">
+    <main className="premium-bg min-h-screen">
+      <AdminNav />
+      <section className="grid min-h-[calc(100vh-74px)] place-items-center px-4 py-8">
       <form onSubmit={submit} className="w-full max-w-md rounded-3xl border border-white/12 bg-white/10 p-7 shadow-glow">
         <h1 className="text-3xl font-black text-shine">CineForge Admin</h1>
-        <p className="mt-2 text-sm text-white/65">Default password: Happy0808. Change it after first login.</p>
+        <p className="mt-2 text-sm text-white/65">Login to manage landing page, checkout, tracking and content.</p>
         <label className="mt-6 block text-sm font-bold text-white/70">Email</label>
         <input value={email} onChange={(e) => setEmail(e.target.value)} className="mt-2 w-full rounded-xl border border-white/12 bg-black/30 px-4 py-3 outline-none" />
         <label className="mt-4 block text-sm font-bold text-white/70">Password</label>
@@ -32,6 +35,7 @@ export default function AdminLoginPage() {
         <button className="mt-6 w-full rounded-full bg-neon px-6 py-3 font-black text-ink">Login</button>
         {message ? <p className="mt-4 text-sm text-cyan">{message}</p> : null}
       </form>
+      </section>
     </main>
   );
 }
