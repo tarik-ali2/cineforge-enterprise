@@ -66,6 +66,11 @@ cmsRouter.patch('/cards/:id', requirePermission('manage_content'), async (req, r
   res.json(await LandingCard.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }));
 });
 
+cmsRouter.delete('/cards/:id', requirePermission('manage_content'), async (req, res) => {
+  await LandingCard.findByIdAndDelete(req.params.id);
+  res.json({ ok: true });
+});
+
 cmsRouter.get('/media', requirePermission('manage_media'), async (_req, res) => {
   res.json(await MediaAsset.find().sort({ createdAt: -1 }).lean());
 });

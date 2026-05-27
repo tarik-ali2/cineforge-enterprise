@@ -68,7 +68,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#070816] text-white">
+    <main className="min-h-screen bg-[#070816] text-white md:pl-[250px]">
       <AdminNav />
       <section className="mx-auto max-w-6xl px-5 py-8">
         <p className="text-sm font-black uppercase tracking-[0.24em] text-cyan">Launch settings</p>

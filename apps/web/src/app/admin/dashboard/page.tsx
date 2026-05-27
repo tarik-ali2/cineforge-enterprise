@@ -14,7 +14,7 @@ const modules = [
 
 export default function AdminDashboardPage() {
   return (
-    <main className="min-h-screen bg-[#07111f] text-white">
+    <main className="min-h-screen bg-[#07111f] text-white md:pl-[250px]">
       <AdminNav />
       <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
         <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.24)] sm:p-7">
