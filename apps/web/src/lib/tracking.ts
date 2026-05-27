@@ -14,6 +14,7 @@ const metaEventMap: Record<string, string> = {
 type TrackingSettings = {
   gtmId: string;
   metaPixelId: string;
+  additionalMetaPixelIds: string[];
   ga4MeasurementId: string;
   googleAdsConversionId: string;
   googleAdsConversionLabel: string;
@@ -47,6 +48,10 @@ async function getTrackingSettings(): Promise<TrackingSettings> {
       return {
         gtmId: clean(settings.gtm_id),
         metaPixelId: clean(settings.meta_pixel_id) || DEFAULT_META_PIXEL_ID,
+        additionalMetaPixelIds: clean(settings.additional_meta_pixel_ids)
+          .split(',')
+          .map((pixelId) => pixelId.trim())
+          .filter(Boolean),
         ga4MeasurementId: clean(settings.ga4_measurement_id) || clean(settings.ga4_id),
         googleAdsConversionId: clean(settings.google_ads_conversion_id),
         googleAdsConversionLabel: clean(settings.google_ads_conversion_label),
@@ -56,6 +61,7 @@ async function getTrackingSettings(): Promise<TrackingSettings> {
     .catch(() => ({
       gtmId: '',
       metaPixelId: DEFAULT_META_PIXEL_ID,
+      additionalMetaPixelIds: [],
       ga4MeasurementId: '',
       googleAdsConversionId: '',
       googleAdsConversionLabel: '',
@@ -117,7 +123,9 @@ export async function initMarketing() {
     fbq.loaded = true;
     fbq.version = '2.0';
     injectScript('cf-meta-pixel', 'https://connect.facebook.net/en_US/fbevents.js');
-    window.fbq('init', settings.metaPixelId);
+    [settings.metaPixelId, ...settings.additionalMetaPixelIds].forEach((pixelId) => {
+      window.fbq?.('init', pixelId);
+    });
     window.fbq('track', 'PageView');
     window.__cfPageViewSent = true;
     recordEventStatus('PageView');
