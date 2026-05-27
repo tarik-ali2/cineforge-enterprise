@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ExternalLink, Gauge, Settings } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Gauge, Images, Settings } from 'lucide-react';
 
 export function AdminNav() {
   return (
@@ -19,6 +19,9 @@ export function AdminNav() {
           </button>
           <a href="/admin/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
             <Gauge size={16} /> Dashboard
+          </a>
+          <a href="/admin/content" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
+            <Images size={16} /> Content
           </a>
           <a href="/admin/settings" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
             <Settings size={16} /> Settings

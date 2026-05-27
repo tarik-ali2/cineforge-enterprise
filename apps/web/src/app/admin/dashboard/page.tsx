@@ -2,9 +2,9 @@ import { AdminNav } from '@/components/AdminNav';
 import { BarChart3, FileText, Image, Lock, Megaphone, Search, Settings, ShoppingCart, Video } from 'lucide-react';
 
 const modules = [
-  { title: 'Landing CMS', desc: 'Hero text, CTA, prompt cards, testimonials and page sections.', icon: FileText, href: '/admin/settings' },
-  { title: 'Media Library', desc: 'Upload images, video links, card names and recommended sizes.', icon: Image, href: '/admin/settings' },
-  { title: 'Video Courses', desc: 'Recorded class cards, course bundles and carousel content.', icon: Video, href: '/admin/settings' },
+  { title: 'Landing CMS', desc: 'Hero text, CTA, prompt cards, testimonials and page sections.', icon: FileText, href: '/admin/content' },
+  { title: 'Media Library', desc: 'Upload images, video links, card names and recommended sizes.', icon: Image, href: '/admin/content' },
+  { title: 'Video Courses', desc: 'Recorded class cards, course bundles and carousel content.', icon: Video, href: '/admin/content' },
   { title: 'Checkout', desc: 'Product price, offer bumps, payment link and thank-you content.', icon: ShoppingCart, href: '/admin/settings' },
   { title: 'SEO Engine', desc: 'Meta title, description, schema, sitemap and index controls.', icon: Search, href: '/admin/settings' },
   { title: 'Tracking Hub', desc: 'GTM, GA4, Meta Pixel, remarketing scripts and DataLayer events.', icon: Megaphone, href: '/admin/settings' },
@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <a href="/admin/settings" className="rounded-xl bg-neon px-5 py-4 text-center font-black text-ink transition hover:scale-[1.01]">
+            <a href="/admin/content" className="rounded-xl bg-neon px-5 py-4 text-center font-black text-ink transition hover:scale-[1.01]">
               Edit Website Content
             </a>
             <a href="/checkout" className="rounded-xl border border-white/15 bg-white/[0.06] px-5 py-4 text-center font-bold text-white transition hover:border-cyan hover:text-cyan">

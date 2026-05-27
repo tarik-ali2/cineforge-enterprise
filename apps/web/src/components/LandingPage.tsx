@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, Sparkles, Timer, Video } from 'lucide-react';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { API_URL } from '@/lib/api';
 import { track } from '@/lib/tracking';
 
 const tools = ['Gemini', 'Midjourney', 'Sora', 'DALL-E', 'Leonardo', 'Google Flow', 'HeyGen', 'InVideo', 'Claude AI', 'GPT'];
@@ -37,6 +38,16 @@ const imageCards = [
   'AI Avatar Script Prompts',
   'Automation Templates'
 ];
+
+type PublicCard = {
+  _id: string;
+  sectionKey: string;
+  cardType: string;
+  title?: string;
+  description?: string;
+  videoUrl?: string;
+  mediaId?: { url?: string; alt?: string };
+};
 const toolStyles = [
   'from-[#2563eb] via-[#7c3aed] to-[#facc15] text-white border-[#facc15]/60',
   'from-[#020617] via-[#334155] to-[#e0f2fe] text-white border-white/30',
@@ -75,6 +86,31 @@ export function LandingPage() {
   const primaryVideos = useCarousel();
   const courseVideoCarousel = useCarousel();
   const imageCarousel = useCarousel();
+  const [cmsCards, setCmsCards] = useState<PublicCard[]>([]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/public/landing`, { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (Array.isArray(data?.cards)) setCmsCards(data.cards);
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const dynamicShowcaseVideos = useMemo(() => {
+    const cards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl);
+    return cards.length ? cards.map((card) => ({ title: card.title || 'Video Card', tag: card.description || 'AI video prompt', url: card.videoUrl || '' })) : showcaseVideos;
+  }, [cmsCards]);
+
+  const dynamicCourseVideos = useMemo(() => {
+    const cards = cmsCards.filter((card) => card.sectionKey === 'course_videos' && card.videoUrl);
+    return cards.length ? cards.map((card) => ({ title: card.title || 'Course Video', tag: card.description || 'Recorded class', url: card.videoUrl || '' })) : courseVideos;
+  }, [cmsCards]);
+
+  const dynamicImageCards = useMemo(() => {
+    const cards = cmsCards.filter((card) => card.sectionKey === 'image_cards' && card.mediaId?.url);
+    return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: card.mediaId?.url || '/cineforge-ai-bundle.png', alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
+  }, [cmsCards]);
 
   return (
     <main className="premium-bg min-h-screen overflow-hidden pb-28">
@@ -143,7 +179,7 @@ export function LandingPage() {
           <CarouselControls onLeft={() => primaryVideos.slide('left')} onRight={() => primaryVideos.slide('right')} />
         </div>
         <div ref={primaryVideos.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {showcaseVideos.map((video) => (
+          {dynamicShowcaseVideos.map((video) => (
             <article key={video.title} className="min-w-[210px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.24)] sm:min-w-[250px]">
               <div className="relative aspect-[9/16] bg-black">
                 <iframe src={video.url} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" />
@@ -232,7 +268,7 @@ export function LandingPage() {
           <CarouselControls onLeft={() => courseVideoCarousel.slide('left')} onRight={() => courseVideoCarousel.slide('right')} />
         </div>
         <div ref={courseVideoCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {courseVideos.map((video) => (
+          {dynamicCourseVideos.map((video) => (
             <article key={video.title} className="min-w-[215px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 sm:min-w-[260px]">
               <div className="relative aspect-[9/16] bg-gradient-to-br from-cyan/25 via-black to-magenta/20">
                 <iframe src={video.url} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" />
@@ -255,14 +291,14 @@ export function LandingPage() {
           <CarouselControls onLeft={() => imageCarousel.slide('left')} onRight={() => imageCarousel.slide('right')} />
         </div>
         <div ref={imageCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {imageCards.map((title, index) => (
-            <article key={title} className="min-w-[260px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.22)] sm:min-w-[310px]">
+          {(dynamicImageCards.length ? dynamicImageCards : imageCards.map((title, index) => ({ title, url: index % 2 === 0 ? '/cineforge-ai-bundle.png' : '/digital-products.png', alt: title }))).map((card) => (
+            <article key={card.title} className="min-w-[260px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.22)] sm:min-w-[310px]">
               <div className="relative aspect-[4/5]">
-                <Image src={index % 2 === 0 ? '/cineforge-ai-bundle.png' : '/digital-products.png'} alt={title} fill className="object-cover" />
+                <Image src={card.url} alt={card.alt} fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
                 <div className="absolute left-4 right-4 bottom-4">
                   <p className="inline-flex items-center gap-2 rounded-full bg-neon px-3 py-1 text-xs font-black text-ink"><PlayCircle size={14} /> Prompt Set</p>
-                  <h3 className="mt-3 text-xl font-black leading-tight text-white">{title}</h3>
+                  <h3 className="mt-3 text-xl font-black leading-tight text-white">{card.title}</h3>
                 </div>
               </div>
             </article>

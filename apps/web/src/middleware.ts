@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const isAdminPage = request.nextUrl.pathname.startsWith('/admin/dashboard');
+  const isAdminPage = request.nextUrl.pathname.startsWith('/admin/') && !request.nextUrl.pathname.startsWith('/admin/login');
   const hasAccessCookie = request.cookies.has('access_token');
   if (isAdminPage && !hasAccessCookie) {
     return NextResponse.redirect(new URL('/admin/login', request.url));

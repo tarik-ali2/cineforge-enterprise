@@ -70,6 +70,40 @@ cmsRouter.get('/media', requirePermission('manage_media'), async (_req, res) => 
   res.json(await MediaAsset.find().sort({ createdAt: -1 }).lean());
 });
 
+cmsRouter.post('/media/link', requirePermission('manage_media'), async (req, res, next) => {
+  try {
+    const body = z.object({
+      folder: z.string().default('external'),
+      url: z.string().url(),
+      title: z.string().min(2),
+      alt: z.string().optional(),
+      caption: z.string().optional(),
+      description: z.string().optional(),
+      width: z.coerce.number().optional(),
+      height: z.coerce.number().optional(),
+      tags: z.string().optional()
+    }).parse(req.body);
+
+    const asset = await MediaAsset.create({
+      folder: body.folder,
+      originalName: body.title,
+      filename: body.url.split('/').pop() || body.title,
+      url: body.url,
+      mimeType: 'external/image',
+      width: body.width,
+      height: body.height,
+      alt: body.alt,
+      title: body.title,
+      caption: body.caption,
+      description: body.description,
+      tags: body.tags ? body.tags.split(',').map((tag) => tag.trim()).filter(Boolean) : [],
+      optimized: false
+    });
+
+    res.status(201).json(asset);
+  } catch (error) { next(error); }
+});
+
 cmsRouter.post('/media', requirePermission('manage_media'), upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) throw new Error('File is required');
