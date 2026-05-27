@@ -91,13 +91,19 @@ export function LandingPage() {
       <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-8 lg:grid-cols-[1.1fr_.9fr]">
         <div>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-4 inline-flex rounded-full border border-cyan/40 bg-white/8 px-4 py-2 text-sm font-bold text-cyan">
-            India's digital creator prompt vault
+            Everything You Need to Start with AI
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="max-w-4xl text-5xl font-black leading-[0.95] md:text-7xl">
-            <span className="text-shine">10k + AI Agent</span><br />
-            Image & Video Creation Bundle + AI Course
+            <span className="text-shine">10K+ Prompts +</span><br />
+            <span className="inline-block animate-[heroPulse_3.2s_ease-in-out_infinite] bg-gradient-to-r from-neon via-cyan to-magenta bg-clip-text text-transparent">
+              AI Agent Course
+            </span><br />
+            <span className="text-white">+ Creation Bundle</span>
           </motion.h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-white/74">
+          <p className="mt-6 max-w-2xl text-xl font-black leading-8 text-neon">
+            No Experience Needed
+          </p>
+          <p className="mt-3 max-w-2xl text-lg leading-8 text-white/74">
             Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
