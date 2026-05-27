@@ -8,10 +8,10 @@ import { track } from '@/lib/tracking';
 
 const tools = ['Gemini', 'Midjourney', 'Sora', 'DALL-E', 'Leonardo', 'Google Flow', 'HeyGen', 'InVideo', 'Claude AI', 'GPT'];
 const courses = [
-  ['ChatGPT Mastery Course', '62 recorded videos'],
-  ['Prompt Engineering Course', '33 recorded videos'],
-  ['SaaS ChatGPT Course', '33 recorded videos'],
-  ['ChatGPT Power Course', '25 recorded videos']
+  ['ChatGPT Mastery Course', '62 recorded videos', 'from-emerald-400 via-cyan to-blue-500'],
+  ['Prompt Engineering Course', '33 recorded videos', 'from-yellow-300 via-orange-400 to-pink-500'],
+  ['SaaS ChatGPT Course', '33 recorded videos', 'from-violet-400 via-fuchsia-500 to-cyan'],
+  ['ChatGPT Power Course', '25 recorded videos', 'from-blue-400 via-indigo-500 to-neon']
 ];
 const testimonials = ['Rahul Sharma', 'Priya Mehta', 'Arjun Verma', 'Neha Kapoor'];
 const showcaseVideos = [
@@ -177,22 +177,47 @@ export function LandingPage() {
       </section>
 
       <section id="courses" className="mx-auto max-w-7xl px-5 py-10">
-        <div className="rounded-3xl border border-white/12 bg-white/8 p-6 md:p-8">
-          <div className="mb-6 flex items-center gap-3">
-            <Video className="text-cyan" />
-            <h2 className="text-3xl font-black">Recorded AI Classes Included</h2>
+        <div className="overflow-hidden rounded-3xl border border-white/12 bg-[linear-gradient(135deg,rgba(255,255,255,.08),rgba(34,211,238,.06),rgba(250,204,21,.05))] p-5 shadow-[0_28px_90px_rgba(0,0,0,.28)] md:p-8">
+          <div className="mb-7 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+            <div>
+              <p className="inline-flex items-center gap-2 rounded-full border border-cyan/35 bg-cyan/10 px-4 py-2 text-sm font-black uppercase tracking-[0.18em] text-cyan">
+                <Video size={17} /> Recorded Classes
+              </p>
+              <h2 className="mt-4 text-3xl font-black md:text-5xl">AI learning stack included</h2>
+              <p className="mt-3 max-w-2xl text-white/62">Prompt bundle ke saath practical recorded classes, templates aur AI tools list bhi milegi.</p>
+            </div>
+            <div className="rounded-2xl border border-neon/30 bg-black/35 px-5 py-4 text-center">
+              <p className="text-3xl font-black text-neon">153+</p>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/55">Recorded videos</p>
+            </div>
           </div>
           <div className="grid gap-4 md:grid-cols-4">
-            {courses.map(([name, count]) => (
-              <div key={name} className="rounded-2xl bg-black/25 p-5">
-                <p className="font-black">{name}</p>
-                <p className="mt-2 text-neon">{count}</p>
-              </div>
+            {courses.map(([name, count, gradient], index) => (
+              <article key={name} className="group overflow-hidden rounded-2xl border border-white/10 bg-black/28 shadow-[0_18px_48px_rgba(0,0,0,.22)]">
+                <div className={`relative aspect-video bg-gradient-to-br ${gradient}`}>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,.44),transparent_24%),linear-gradient(180deg,transparent,rgba(0,0,0,.38))]" />
+                  <div className="absolute left-4 top-4 rounded-full bg-black/55 px-3 py-1 text-xs font-black text-white backdrop-blur">Module {index + 1}</div>
+                  <div className="absolute inset-0 grid place-items-center">
+                    <div className="grid h-14 w-14 place-items-center rounded-full bg-white/90 text-ink shadow-glow transition group-hover:scale-110">
+                      <PlayCircle size={30} />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-5">
+                  <p className="font-black leading-snug">{name}</p>
+                  <p className="mt-2 text-sm font-black text-neon">{count}</p>
+                </div>
+              </article>
             ))}
           </div>
-          <div className="mt-6 grid gap-3 text-sm font-bold text-white/80 md:grid-cols-3">
-            {['2500 Digital Product Ideas', '365+ Automation Templates', '1500+ AI Tools'].map((bonus) => (
-              <p key={bonus} className="flex items-center gap-2"><CheckCircle2 className="text-cyan" size={18} /> {bonus}</p>
+          <div className="mt-6 grid gap-3 text-sm font-bold text-white/86 md:grid-cols-3">
+            {['2500 Digital Product Ideas', '365+ Automation Templates', '1500+ AI Tools'].map((bonus, index) => (
+              <p key={bonus} className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.06] p-4">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-cyan/12 text-cyan ring-1 ring-cyan/25">
+                  <CheckCircle2 size={18} />
+                </span>
+                <span>{bonus}</span>
+              </p>
             ))}
           </div>
         </div>
