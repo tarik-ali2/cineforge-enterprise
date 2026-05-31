@@ -91,11 +91,17 @@ export default function AdminSettingsPage() {
     setLoading(true);
     setMessage(`${field.label} save ho raha hai...`);
     try {
-      const response = await fetch(`${API_URL}/api/admin/settings/${field.group}/${field.key}`, {
+      const response = await fetch(`${API_URL}/api/admin/settings`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: values[field.key] ?? '' })
+        body: JSON.stringify({
+          settings: [{
+            group: field.group,
+            key: field.key,
+            value: values[field.key] ?? ''
+          }]
+        })
       });
       if (response.status === 401 || response.status === 403) throw new Error('Session expired. Please admin login dobara karo.');
       if (!response.ok) throw new Error('Save failed. Login ya permissions check karo.');
