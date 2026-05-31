@@ -1,16 +1,17 @@
-import serverless from 'serverless-http';
-import { createApp } from '../apps/api/dist/app.js';
+const serverless = require('serverless-http');
 
 let handlerPromise;
 
 async function getHandler() {
   if (!handlerPromise) {
-    handlerPromise = createApp({ serveStaticMedia: false }).then((app) => serverless(app));
+    handlerPromise = import('../apps/api/dist/app.js')
+      .then(({ createApp }) => createApp({ serveStaticMedia: false }))
+      .then((app) => serverless(app));
   }
   return handlerPromise;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const fn = await getHandler();
   return fn(req, res);
-}
+};
