@@ -1,30 +1,24 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
   Edit3,
-  Eye,
-  EyeOff,
-  HelpCircle,
-  ImagePlus,
-  LayoutGrid,
+  ExternalLink,
+  Image as ImageIcon,
+  Images,
   Link2,
-  MonitorPlay,
-  Palette,
-  PlaySquare,
-  PlusCircle,
+  Loader2,
   RefreshCcw,
   Save,
-  Sparkles,
-  Trash2,
-  Video,
-  X
+  Upload,
+  Video
 } from 'lucide-react';
 import { API_URL } from '@/lib/api';
 import { AdminNav } from '@/components/AdminNav';
 
 type MediaAsset = { _id: string; url: string; alt?: string };
+type CardType = 'image' | 'video' | 'course';
 type LandingCard = {
   _id: string;
   sectionKey: string;
@@ -42,97 +36,64 @@ type LandingCard = {
   active?: boolean;
 };
 
-type SectionConfig = {
-  key: string;
+type Slot = {
+  id: string;
+  sectionKey: string;
+  group: string;
   label: string;
-  simpleName: string;
-  oldName: string;
-  help: string;
-  bestFor: string;
-  type: 'image' | 'video' | 'course';
-  width: string;
-  height: string;
-  icon: typeof LayoutGrid;
+  title: string;
+  description: string;
+  type: CardType;
+  width: number;
+  height: number;
+  badgeText?: string;
+  borderColor?: string;
+  sortOrder: number;
 };
 
-const sections: SectionConfig[] = [
-  {
-    key: 'market_cards',
-    label: 'Popular 3-Column Cards',
-    simpleName: 'Screenshot wali 3 cards',
-    oldName: 'marketCards',
-    help: 'Image/video, headline, border, badge aur niche text. Desktop par 3 cards ek row me dikhte hain.',
-    bestFor: 'Wedding prompt, photoshoot prompt, invitation prompt jaise big cards.',
-    type: 'image',
-    width: '1080',
-    height: '1350',
-    icon: LayoutGrid
-  },
-  {
-    key: 'showcase_videos',
-    label: 'Top Reel Videos',
-    simpleName: 'Upar wale reel videos',
-    oldName: 'videoSlider',
-    help: 'Landing page ke top section me reel format YouTube videos.',
-    bestFor: 'Short demo reels aur product previews.',
-    type: 'video',
-    width: '1080',
-    height: '1920',
-    icon: PlaySquare
-  },
-  {
-    key: 'course_videos',
-    label: 'Course Video Slider',
-    simpleName: 'Recorded course videos',
-    oldName: 'courseSlider',
-    help: 'Recorded AI classes ke reel video cards.',
-    bestFor: 'ChatGPT Mastery, Prompt Engineering, SaaS ChatGPT jaise course previews.',
-    type: 'course',
-    width: '1080',
-    height: '1920',
-    icon: MonitorPlay
-  },
-  {
-    key: 'image_cards',
-    label: 'Image Slider',
-    simpleName: 'Image slider cards',
-    oldName: 'categorySlider',
-    help: 'Prompt bundle/product visual image cards slider me.',
-    bestFor: 'Bundle screenshots, product visuals, category images.',
-    type: 'image',
-    width: '1200',
-    height: '1500',
-    icon: ImagePlus
-  },
-  {
-    key: 'prompt_categories',
-    label: 'Prompt Category Cards',
-    simpleName: 'Small category cards',
-    oldName: 'promptSlider',
-    help: 'Small category cards for prompt sets.',
-    bestFor: 'Business, reels, ads, product shoot categories.',
-    type: 'image',
-    width: '1200',
-    height: '900',
-    icon: Sparkles
-  }
+type SlotDraft = {
+  title: string;
+  description: string;
+  url: string;
+  badgeText: string;
+  borderColor: string;
+};
+
+const slots: Slot[] = [
+  { id: 'cat1', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 1', title: 'Indian Wedding Invitation Prompt', description: 'Premium invitation prompt card.', type: 'image', width: 1080, height: 1080, badgeText: 'Most Popular', borderColor: '#ff0000', sortOrder: 1 },
+  { id: 'cat2', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 2', title: 'Indian Wedding Photoshoot Prompt', description: 'Couple photoshoot and cinematic wedding prompt.', type: 'image', width: 1080, height: 1080, badgeText: 'Trending', borderColor: '#ff0000', sortOrder: 2 },
+  { id: 'cat3', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 3', title: 'Commercial Brand Campaign Prompt', description: 'Product ad, brand campaign and creative visuals.', type: 'image', width: 1080, height: 1080, badgeText: 'Best Seller', borderColor: '#ff0000', sortOrder: 3 },
+  { id: 'cat4', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 4', title: 'Birthday Celebration Prompt', description: 'Birthday poster and celebration video prompt.', type: 'image', width: 1080, height: 1080, badgeText: 'Popular', borderColor: '#ff1f7a', sortOrder: 4 },
+  { id: 'cat5', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 5', title: 'Real Estate Promo Prompt', description: 'Property, interior and real estate ad prompts.', type: 'image', width: 1080, height: 1080, badgeText: 'Creator Pick', borderColor: '#2563eb', sortOrder: 5 },
+  { id: 'cat6', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 6', title: 'Fashion Product Shoot Prompt', description: 'Fashion, model and premium product shoot prompts.', type: 'image', width: 1080, height: 1080, badgeText: 'Viral Pack', borderColor: '#8b5cf6', sortOrder: 6 },
+
+  { id: 'topv1', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 1', title: 'Cinematic Product Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 1 },
+  { id: 'topv2', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 2', title: 'AI Prompt Demo Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 2 },
+  { id: 'topv3', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 3', title: 'Creator Output Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 3 },
+  { id: 'topv4', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 4', title: 'Business Ad Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 4 },
+
+  { id: 'course1', sectionKey: 'course_videos', group: 'Recorded Course Videos', label: 'Course Video 1', title: 'ChatGPT Mastery Course', description: '62 recorded videos', type: 'course', width: 1080, height: 1920, sortOrder: 1 },
+  { id: 'course2', sectionKey: 'course_videos', group: 'Recorded Course Videos', label: 'Course Video 2', title: 'Prompt Engineering Course', description: '33 recorded videos', type: 'course', width: 1080, height: 1920, sortOrder: 2 },
+  { id: 'course3', sectionKey: 'course_videos', group: 'Recorded Course Videos', label: 'Course Video 3', title: 'SaaS ChatGPT Course', description: '33 recorded videos', type: 'course', width: 1080, height: 1920, sortOrder: 3 },
+  { id: 'course4', sectionKey: 'course_videos', group: 'Recorded Course Videos', label: 'Course Video 4', title: 'ChatGPT Power Course', description: '25 recorded videos', type: 'course', width: 1080, height: 1920, sortOrder: 4 },
+
+  ...Array.from({ length: 8 }, (_, index) => ({
+    id: `img${index + 1}`,
+    sectionKey: 'image_cards',
+    group: 'Image Card Slider',
+    label: `Image Card ${index + 1}`,
+    title: `Prompt Bundle Image ${index + 1}`,
+    description: 'Image slider card.',
+    type: 'image' as CardType,
+    width: 1200,
+    height: 1500,
+    badgeText: '',
+    borderColor: '#ff0000',
+    sortOrder: index + 1
+  }))
 ];
 
-const initial = {
-  sectionKey: 'market_cards',
-  cardType: 'image',
-  adminName: '',
-  title: '',
-  description: '',
-  videoUrl: '',
-  imageUrl: '',
-  badgeText: 'Most Popular',
-  borderColor: '#ff0000',
-  sortOrder: '0',
-  active: true,
-  recommendedWidth: '1080',
-  recommendedHeight: '1350'
-};
+const groupOrder = ['Popular 3-Column Cards', 'Top Reel Video Slider', 'Recorded Course Videos', 'Image Card Slider'];
 
 function toEmbedUrl(url: string) {
   const value = url.trim();
@@ -150,150 +111,174 @@ function toEmbedUrl(url: string) {
   return value;
 }
 
-function sectionByKey(key: string) {
-  return sections.find((section) => section.key === key) ?? sections[0];
+function isVideoUrl(url: string) {
+  return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
 export default function AdminContentPage() {
   const [cards, setCards] = useState<LandingCard[]>([]);
-  const [form, setForm] = useState(initial);
-  const [editingId, setEditingId] = useState('');
+  const [drafts, setDrafts] = useState<Record<string, SlotDraft>>({});
   const [message, setMessage] = useState('');
-  const [openAdvanced, setOpenAdvanced] = useState(false);
+  const [savingSlot, setSavingSlot] = useState('');
+  const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  const currentSection = sectionByKey(form.sectionKey);
-  const isVideo = form.cardType === 'video' || form.cardType === 'course';
-  const sectionCards = cards.filter((card) => card.sectionKey === form.sectionKey);
+  const cardsBySlot = useMemo(() => {
+    const map = new Map<string, LandingCard>();
+    slots.forEach((slot) => {
+      const card = cards.find((item) => item.sectionKey === slot.sectionKey && Number(item.sortOrder) === slot.sortOrder);
+      if (card) map.set(slot.id, card);
+    });
+    return map;
+  }, [cards]);
 
-  const metrics = useMemo(() => ({
-    total: cards.length,
-    videos: cards.filter((card) => card.cardType === 'video' || card.cardType === 'course').length,
-    images: cards.filter((card) => card.cardType === 'image').length,
-    live: cards.filter((card) => card.active).length
-  }), [cards]);
+  const groupedSlots = useMemo(() => groupOrder.map((group) => ({
+    group,
+    items: slots.filter((slot) => slot.group === group)
+  })), []);
 
   async function load() {
     const response = await fetch(`${API_URL}/api/cms/cards`, { credentials: 'include' });
-    if (response.ok) {
-      setCards(await response.json());
+    if (!response.ok) {
+      setMessage('Session expired lag rahi hai. Please admin login dobara karo.');
       return;
     }
-    setMessage('Session expired lag rahi hai. Please admin login dobara karo.');
+
+    const nextCards: LandingCard[] = await response.json();
+    setCards(nextCards);
+    const nextDrafts: Record<string, SlotDraft> = {};
+    slots.forEach((slot) => {
+      const card = nextCards.find((item) => item.sectionKey === slot.sectionKey && Number(item.sortOrder) === slot.sortOrder);
+      nextDrafts[slot.id] = {
+        title: card?.title || slot.title,
+        description: card?.description || slot.description,
+        url: card?.videoUrl || card?.mediaId?.url || '',
+        badgeText: card?.badgeText || slot.badgeText || '',
+        borderColor: card?.borderColor || slot.borderColor || '#ff0000'
+      };
+    });
+    setDrafts(nextDrafts);
   }
 
   useEffect(() => {
     load().catch(() => setMessage('API connect nahi ho pa raha. Deployment/env check karo.'));
   }, []);
 
-  function chooseSection(sectionKey: string) {
-    const next = sectionByKey(sectionKey);
-    setForm({
-      ...form,
-      sectionKey: next.key,
-      cardType: next.type,
-      recommendedWidth: next.width,
-      recommendedHeight: next.height
-    });
+  function updateDraft(slotId: string, patch: Partial<SlotDraft>) {
+    setDrafts((current) => ({
+      ...current,
+      [slotId]: { ...(current[slotId] || { title: '', description: '', url: '', badgeText: '', borderColor: '#ff0000' }), ...patch }
+    }));
   }
 
-  function resetForm() {
-    setEditingId('');
-    setOpenAdvanced(false);
-    setForm(initial);
-  }
-
-  function edit(card: LandingCard) {
-    const section = sectionByKey(card.sectionKey);
-    setEditingId(card._id);
-    setForm({
-      sectionKey: card.sectionKey,
-      cardType: card.cardType,
-      adminName: card.adminName || card.title || '',
-      title: card.title || '',
-      description: card.description || '',
-      videoUrl: card.videoUrl || '',
-      imageUrl: card.mediaId?.url || '',
-      badgeText: card.badgeText || 'Most Popular',
-      borderColor: card.borderColor || '#ff0000',
-      sortOrder: String(card.sortOrder ?? 0),
-      active: Boolean(card.active),
-      recommendedWidth: String(card.recommendedWidth ?? section.width),
-      recommendedHeight: String(card.recommendedHeight ?? section.height)
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function save() {
-    setMessage('Saving...');
-    const publicTitle = form.title.trim();
-    const adminName = form.adminName.trim() || publicTitle;
-
-    if (!adminName || !publicTitle) {
-      setMessage('Card name aur public headline dono required hain.');
-      return;
-    }
-    if (isVideo && !form.videoUrl.trim()) {
-      setMessage('YouTube video link required hai.');
-      return;
-    }
-    if (!isVideo && !form.imageUrl.trim()) {
-      setMessage('Image URL required hai.');
-      return;
-    }
-
-    let mediaId = '';
-    if (!isVideo && (!editingId || form.imageUrl.startsWith('http'))) {
-      const mediaResponse = await fetch(`${API_URL}/api/cms/media/link`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          folder: form.sectionKey,
-          url: form.imageUrl,
-          title: publicTitle,
-          alt: publicTitle,
-          width: Number(form.recommendedWidth),
-          height: Number(form.recommendedHeight)
-        })
-      });
-      if (mediaResponse.ok) mediaId = (await mediaResponse.json())._id;
-    }
-
-    const payload = {
-      sectionKey: form.sectionKey,
-      cardType: form.cardType as 'image' | 'video' | 'course',
-      adminName,
-      title: publicTitle,
-      description: form.description,
-      videoUrl: isVideo ? toEmbedUrl(form.videoUrl) : '',
-      badgeText: form.badgeText,
-      borderColor: form.borderColor,
-      ...(mediaId ? { mediaId } : {}),
-      targetSlot: currentSection.oldName,
-      recommendedWidth: Number(form.recommendedWidth),
-      recommendedHeight: Number(form.recommendedHeight),
-      sortOrder: Number(form.sortOrder) || 0,
-      active: form.active
-    };
-
-    const response = await fetch(`${API_URL}/api/cms/cards${editingId ? `/${editingId}` : ''}`, {
-      method: editingId ? 'PATCH' : 'POST',
+  async function createMediaLink(slot: Slot, url: string, title: string) {
+    const response = await fetch(`${API_URL}/api/cms/media/link`, {
+      method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        folder: slot.sectionKey,
+        url,
+        title,
+        alt: title,
+        width: slot.width,
+        height: slot.height
+      })
     });
+    if (!response.ok) throw new Error('Media URL save failed');
+    return (await response.json()) as MediaAsset;
+  }
 
-    if (!response.ok) {
-      setMessage('Save failed. Login dobara karo ya fields check karo.');
+  async function saveSlot(slot: Slot, uploadedMedia?: MediaAsset) {
+    const draft = drafts[slot.id];
+    const title = draft?.title?.trim() || slot.title;
+    const description = draft?.description?.trim() || slot.description;
+    const url = draft?.url?.trim() || uploadedMedia?.url || '';
+    const card = cardsBySlot.get(slot.id);
+    const shouldBeVideo = slot.type !== 'image' || isVideoUrl(url);
+    const cardType: CardType = shouldBeVideo ? (slot.type === 'course' ? 'course' : 'video') : 'image';
+
+    if (!url && !card?.mediaId?.url && !card?.videoUrl) {
+      setMessage(`${slot.label}: pehle Image URL ya YouTube link paste karo.`);
       return;
     }
 
-    setMessage(editingId ? 'Card update ho gaya.' : 'New card website par add ho gaya.');
-    resetForm();
-    await load();
+    setSavingSlot(slot.id);
+    setMessage(`${slot.label} save ho raha hai...`);
+
+    try {
+      let mediaId = uploadedMedia?._id || '';
+      if (!shouldBeVideo && url && url !== card?.mediaId?.url) {
+        mediaId = (await createMediaLink(slot, url, title))._id;
+      }
+
+      const payload = {
+        sectionKey: slot.sectionKey,
+        cardType,
+        adminName: `${slot.label} - ${title}`,
+        title,
+        description,
+        badgeText: draft?.badgeText || slot.badgeText || '',
+        borderColor: draft?.borderColor || slot.borderColor || '#ff0000',
+        videoUrl: shouldBeVideo ? toEmbedUrl(url || card?.videoUrl || '') : '',
+        ...(mediaId ? { mediaId } : {}),
+        targetSlot: slot.id,
+        recommendedWidth: slot.width,
+        recommendedHeight: slot.height,
+        sortOrder: slot.sortOrder,
+        active: true
+      };
+
+      const response = await fetch(`${API_URL}/api/cms/cards${card ? `/${card._id}` : ''}`, {
+        method: card ? 'PATCH' : 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error('Card save failed');
+      setMessage(`${slot.label} saved successfully.`);
+      await load();
+    } catch {
+      setMessage(`${slot.label} save nahi hua. Login ya URL check karo.`);
+    } finally {
+      setSavingSlot('');
+    }
   }
 
-  async function toggle(card: LandingCard) {
+  async function uploadFile(slot: Slot, event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const draft = drafts[slot.id];
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', slot.sectionKey);
+    formData.append('title', draft?.title || slot.title);
+    formData.append('alt', draft?.title || slot.title);
+
+    setSavingSlot(slot.id);
+    setMessage(`${slot.label} upload ho raha hai...`);
+
+    try {
+      const response = await fetch(`${API_URL}/api/cms/media`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      if (!response.ok) throw new Error('Upload failed');
+      const media = (await response.json()) as MediaAsset;
+      updateDraft(slot.id, { url: media.url });
+      await saveSlot(slot, media);
+    } catch {
+      setMessage('Upload failed. Vercel par permanent image ke liye imgbb.com URL use karo.');
+    } finally {
+      setSavingSlot('');
+      event.target.value = '';
+    }
+  }
+
+  async function toggle(slot: Slot) {
+    const card = cardsBySlot.get(slot.id);
+    if (!card) return;
     await fetch(`${API_URL}/api/cms/cards/${card._id}`, {
       method: 'PATCH',
       credentials: 'include',
@@ -303,332 +288,179 @@ export default function AdminContentPage() {
     await load();
   }
 
-  async function remove(card: LandingCard) {
-    if (!confirm(`Delete "${card.adminName || card.title}"?`)) return;
-    await fetch(`${API_URL}/api/cms/cards/${card._id}`, { method: 'DELETE', credentials: 'include' });
-    await load();
-  }
-
   return (
-    <main className="min-h-screen bg-[#f4f7fb] text-[#101827] md:pl-[250px]">
+    <main className="min-h-screen bg-[#f3f6fb] text-[#0f172a] md:pl-[250px]">
       <AdminNav />
-      <section className="px-4 py-5 sm:px-6">
-        <header className="mb-5 rounded-[1.5rem] bg-gradient-to-br from-[#07111f] via-[#12233a] to-[#0c4a5a] p-5 text-white shadow-[0_24px_80px_rgba(8,18,40,0.18)] sm:p-6">
+      <section className="px-4 py-5 sm:px-8">
+        <header className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-cyan/30 bg-cyan/10 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-cyan">
-                <Sparkles size={14} /> Beginner Friendly Editor
+              <p className="inline-flex items-center gap-2 text-sm font-black text-blue-700">
+                <Images size={18} /> Media Manager
               </p>
-              <h1 className="mt-3 text-3xl font-black sm:text-4xl">Landing Page Cards</h1>
-              <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">
-                Yahan se aap website ke image cards, YouTube reel cards, course videos aur screenshot wali 3-column cards edit kar sakte ho.
+              <h1 className="mt-2 text-3xl font-black">Landing Page Card Manager</h1>
+              <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-500">
+                Har card ka fixed box neeche diya hai. Image URL ya YouTube link paste karo, headline edit karo, phir URL Save dabao.
               </p>
             </div>
-            <a href="/" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#ffe34d] px-5 py-3 font-black text-[#111827] shadow-[0_12px_30px_rgba(255,227,77,0.25)]">
-              <Eye size={18} /> Website Dekho
-            </a>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={() => load()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 font-black text-slate-700 hover:bg-slate-50">
+                <RefreshCcw size={17} /> Refresh
+              </button>
+              <a href="/" className="inline-flex items-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white">
+                <ExternalLink size={17} /> Website Dekho
+              </a>
+            </div>
           </div>
         </header>
 
-        <div className="mb-5 grid gap-3 sm:grid-cols-4">
-          {[
-            ['Total Cards', metrics.total],
-            ['Video Cards', metrics.videos],
-            ['Image Cards', metrics.images],
-            ['Live Cards', metrics.live]
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <p className="text-3xl font-black text-[#0f766e]">{value}</p>
-              <p className="mt-1 text-sm font-bold text-slate-500">{label}</p>
-            </div>
-          ))}
+        <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-slate-700">
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Recommended:</strong> 1080x1080px square cards, reels ke liye 1080x1920px.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Format:</strong> JPG, PNG, WebP, MP4, YouTube URL ya Wistia URL.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Best flow:</strong> imgbb.com par image upload karo, “Direct link” copy karo, URL box me paste karo, URL Save dabao.</p>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[520px_1fr]">
-          <form onSubmit={(event) => { event.preventDefault(); save(); }} className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="inline-flex items-center gap-2 text-2xl font-black">
-                  <PlusCircle className="text-[#0f766e]" /> {editingId ? 'Card Edit Karo' : 'New Card Add Karo'}
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">Bas 3 steps follow karo. Technical fields optional hain.</p>
-              </div>
-              {editingId ? (
-                <button type="button" onClick={resetForm} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50">
-                  <X size={15} /> Cancel
-                </button>
-              ) : null}
-            </div>
+        {message ? (
+          <div className="sticky top-3 z-20 mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 shadow-sm">
+            {message}
+          </div>
+        ) : null}
 
-            <div className="mt-5 rounded-2xl border border-[#99f6e4] bg-[#ecfeff] p-4">
-              <p className="flex items-center gap-2 font-black text-[#0f3f46]">
-                <HelpCircle size={18} /> Quick Guide
-              </p>
-              <div className="mt-3 grid gap-2 text-sm font-semibold text-[#155e75]">
-                <p><strong>Screenshot wali cards:</strong> “Screenshot wali 3 cards” select karo.</p>
-                <p><strong>YouTube reel:</strong> normal YouTube link paste karo, embed apne aap ban jayega.</p>
-                <p><strong>Order:</strong> 1, 2, 3 se decide hota hai kaunsa card pehle dikhega.</p>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <p className="mb-3 flex items-center gap-2 text-sm font-black uppercase tracking-[0.12em] text-[#0f766e]">
-                <CheckCircle2 size={16} /> Step 1: Card kaha dikhana hai?
-              </p>
-              <div className="grid gap-3">
-                {sections.map((section) => {
-                  const Icon = section.icon;
-                  const selected = form.sectionKey === section.key;
-                  return (
-                    <button
-                      key={section.key}
-                      type="button"
-                      onClick={() => chooseSection(section.key)}
-                      className={`rounded-2xl border p-4 text-left transition ${selected ? 'border-[#0f766e] bg-[#ecfdf5] shadow-[0_12px_28px_rgba(15,118,110,0.12)]' : 'border-slate-200 bg-white hover:border-[#0f766e]/40 hover:bg-slate-50'}`}
-                    >
-                      <span className="flex items-start gap-3">
-                        <span className={`grid h-11 w-11 place-items-center rounded-xl ${selected ? 'bg-[#0f766e] text-white' : 'bg-slate-100 text-slate-600'}`}>
-                          <Icon size={22} />
-                        </span>
-                        <span>
-                          <span className="block text-lg font-black">{section.simpleName}</span>
-                          <span className="mt-1 block text-sm leading-5 text-slate-500">{section.help}</span>
-                          <span className="mt-2 block text-xs font-black uppercase tracking-[0.12em] text-[#ea580c]">{section.bestFor}</span>
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4">
-              <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.12em] text-[#0f766e]">
-                <CheckCircle2 size={16} /> Step 2: Card ka text likho
-              </p>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-black text-slate-700">Admin Name</span>
-                <span className="text-xs font-semibold text-slate-500">Ye sirf aapko admin me dikhega. Example: Wedding Card 1</span>
-                <input value={form.adminName} onChange={(event) => setForm({ ...form, adminName: event.target.value })} placeholder="Example: Wedding prompt card 1" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-black text-slate-700">Public Headline</span>
-                <span className="text-xs font-semibold text-slate-500">Ye website par card ke upar dikhega.</span>
-                <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Example: Indian Wedding Invitation Prompt" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-black text-slate-700">Niche ka text / description</span>
-                <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Example: Ready-to-copy prompt for premium wedding invitation videos." className="min-h-[96px] rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-              </label>
-            </div>
-
-            <div className="mt-6 grid gap-4">
-              <p className="flex items-center gap-2 text-sm font-black uppercase tracking-[0.12em] text-[#0f766e]">
-                <CheckCircle2 size={16} /> Step 3: Image ya Video link add karo
-              </p>
-
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { value: 'image', label: 'Image Card', icon: ImagePlus },
-                  { value: 'video', label: 'YouTube Reel', icon: Video },
-                  { value: 'course', label: 'Course Video', icon: MonitorPlay }
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const selected = form.cardType === item.value;
-                  return (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => setForm({ ...form, cardType: item.value })}
-                      className={`rounded-2xl border px-3 py-4 text-sm font-black ${selected ? 'border-[#0f766e] bg-[#0f766e] text-white' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}
-                    >
-                      <Icon className="mx-auto mb-2" size={22} />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {isVideo ? (
-                <label className="grid gap-2">
-                  <span className="inline-flex items-center gap-2 text-sm font-black text-slate-700"><Video size={16} /> YouTube Video Link</span>
-                  <input value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} placeholder="https://www.youtube.com/watch?v=..." className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                </label>
-              ) : (
-                <label className="grid gap-2">
-                  <span className="inline-flex items-center gap-2 text-sm font-black text-slate-700"><ImagePlus size={16} /> Image URL</span>
-                  <input value={form.imageUrl} onChange={(event) => setForm({ ...form, imageUrl: event.target.value })} placeholder="https://example.com/image.webp" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                </label>
-              )}
-            </div>
-
-            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <button type="button" onClick={() => setOpenAdvanced(!openAdvanced)} className="flex w-full items-center justify-between text-left font-black text-slate-800">
-                <span className="inline-flex items-center gap-2"><Palette size={18} /> Optional Design Settings</span>
-                <span>{openAdvanced ? 'Hide' : 'Open'}</span>
-              </button>
-
-              {openAdvanced ? (
-                <div className="mt-4 grid gap-4">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="grid gap-2">
-                      <span className="text-sm font-black text-slate-700">Badge Text</span>
-                      <input value={form.badgeText} onChange={(event) => setForm({ ...form, badgeText: event.target.value })} placeholder="Most Popular" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-sm font-black text-slate-700">Border Color</span>
-                      <span className="flex gap-2">
-                        <input type="color" value={form.borderColor} onChange={(event) => setForm({ ...form, borderColor: event.target.value })} className="h-12 w-14 rounded-xl border border-slate-200 bg-white p-1" />
-                        <input value={form.borderColor} onChange={(event) => setForm({ ...form, borderColor: event.target.value })} placeholder="#ff0000" className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                      </span>
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <label className="grid gap-2">
-                      <span className="text-sm font-black text-slate-700">Width</span>
-                      <input value={form.recommendedWidth} onChange={(event) => setForm({ ...form, recommendedWidth: event.target.value })} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-sm font-black text-slate-700">Height</span>
-                      <input value={form.recommendedHeight} onChange={(event) => setForm({ ...form, recommendedHeight: event.target.value })} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                    </label>
-                    <label className="grid gap-2">
-                      <span className="text-sm font-black text-slate-700">Order</span>
-                      <input value={form.sortOrder} onChange={(event) => setForm({ ...form, sortOrder: event.target.value })} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold outline-none focus:border-[#0f766e]" />
-                    </label>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <label className="mt-5 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-              <input type="checkbox" checked={form.active} onChange={(event) => setForm({ ...form, active: event.target.checked })} className="h-5 w-5 accent-[#0f766e]" />
-              <span>
-                <span className="block font-black">Website par show karo</span>
-                <span className="text-xs font-semibold text-slate-500">Untick karoge to card hidden rahega.</span>
-              </span>
-            </label>
-
-            <button type="submit" className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ffe34d] to-[#ff8a2a] px-5 py-4 font-black text-[#111827] shadow-[0_16px_36px_rgba(255,138,42,0.22)]">
-              <Save size={18} /> {editingId ? 'Update Card' : 'Save Card'}
-            </button>
-            {message ? <p className="mt-4 rounded-2xl border border-[#67e8f9] bg-[#ecfeff] p-3 text-sm font-bold text-[#155e75]">{message}</p> : null}
-          </form>
-
-          <section className="space-y-5">
-            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="space-y-8">
+          {groupedSlots.map(({ group, items }) => (
+            <section key={group} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-black">Live Preview</h2>
-                  <p className="text-sm font-semibold text-slate-500">Save se pehle card roughly aisa dikhega.</p>
+                  <h2 className="text-2xl font-black">{group}</h2>
+                  <p className="mt-1 text-sm font-semibold text-slate-500">
+                    {items.length} fixed slots. Title, border, badge aur URL editable hain.
+                  </p>
                 </div>
-                <span className="rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-black text-[#0f766e]">{currentSection.simpleName}</span>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
+                  {items[0]?.width}x{items[0]?.height}px
+                </span>
               </div>
 
-              {form.sectionKey === 'market_cards' ? (
-                <div className="rounded-2xl bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
-                  <div className="mb-3 flex justify-end">
-                    <span className="rounded-b-xl bg-gradient-to-r from-[#ff1f8a] to-[#7c3aed] px-4 py-1 text-sm font-black text-white shadow-lg">
-                      {form.badgeText || 'Most Popular'}
-                    </span>
-                  </div>
-                  <h3 className="mb-4 text-2xl font-black text-slate-900">{form.title || 'Indian Wedding Invitation Prompt'}</h3>
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border-[6px] bg-slate-100" style={{ borderColor: form.borderColor || '#ff0000' }}>
-                    {form.imageUrl ? <img src={form.imageUrl} alt="" className="h-full w-full object-cover" /> : (
-                      <div className="grid h-full place-items-center text-center text-slate-400">
-                        <ImagePlus size={42} className="mx-auto mb-2" />
-                        Image preview
-                      </div>
-                    )}
-                    {isVideo ? <div className="absolute inset-0 grid place-items-center"><span className="grid h-20 w-20 place-items-center rounded-full bg-blue-600/85 text-white"><PlaySquare size={36} /></span></div> : null}
-                  </div>
-                  <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">{form.description || 'Niche ka benefit text yahan dikhega.'}</p>
-                </div>
-              ) : (
-                <div className="mx-auto max-w-[260px] rounded-[1.5rem] border border-slate-200 bg-[#08111f] p-3 text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-                  <div className="relative aspect-[9/16] overflow-hidden rounded-[1.15rem] bg-slate-900">
-                    {!isVideo && form.imageUrl ? <img src={form.imageUrl} alt="" className="h-full w-full object-cover" /> : null}
-                    <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-cyan/20 via-transparent to-[#ffe34d]/20">
-                      <span className="grid h-16 w-16 place-items-center rounded-full bg-[#ffe34d] text-[#111827]"><PlaySquare size={30} /></span>
-                    </div>
-                  </div>
-                  <h3 className="mt-3 font-black">{form.title || 'Video / Image Card Title'}</h3>
-                  <p className="mt-1 text-sm text-white/60">{form.description || 'Short description yahan dikhega.'}</p>
-                </div>
-              )}
-            </div>
+              <div className="divide-y divide-slate-200">
+                {items.map((slot) => {
+                  const card = cardsBySlot.get(slot.id);
+                  const draft = drafts[slot.id] || {
+                    title: slot.title,
+                    description: slot.description,
+                    url: card?.videoUrl || card?.mediaId?.url || '',
+                    badgeText: slot.badgeText || '',
+                    borderColor: slot.borderColor || '#ff0000'
+                  };
+                  const thumb = card?.mediaId?.url || (!isVideoUrl(draft.url) ? draft.url : '');
+                  const isSaving = savingSlot === slot.id;
 
-            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-2xl font-black">Is Section ke Cards</h2>
-                  <p className="text-sm font-semibold text-slate-500">{currentSection.simpleName}: {sectionCards.length} cards</p>
-                </div>
-                <button onClick={() => load()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50">
-                  <RefreshCcw size={16} /> Refresh
-                </button>
-              </div>
-
-              <div className="grid gap-3">
-                {sectionCards.length ? sectionCards.map((card) => (
-                  <article key={card._id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                      {card.mediaId?.url ? (
-                        <img src={card.mediaId.url} alt="" className="h-24 w-24 rounded-xl border border-slate-200 object-cover" />
-                      ) : (
-                        <div className="grid h-24 w-24 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white text-[#0f766e]"><Video size={28} /></div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-black">{card.title || card.adminName}</h3>
-                          <span className={`rounded-full px-2 py-1 text-xs font-black ${card.active ? 'bg-[#dcfce7] text-[#166534]' : 'bg-slate-200 text-slate-500'}`}>
-                            {card.active ? 'Live' : 'Hidden'}
-                          </span>
+                  return (
+                    <article key={slot.id} className="py-5">
+                      <div className="grid gap-4 lg:grid-cols-[80px_1fr_110px] lg:items-start">
+                        <div className="h-16 w-20 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                          {thumb ? (
+                            <img src={thumb} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="grid h-full place-items-center text-slate-400">
+                              {slot.type === 'image' ? <ImageIcon size={24} /> : <Video size={24} />}
+                            </div>
+                          )}
                         </div>
-                        <p className="mt-1 text-sm font-semibold text-slate-500">{card.description || 'No description'}</p>
-                        <p className="mt-2 flex max-w-full items-center gap-1 break-all text-xs font-semibold text-slate-400">
-                          <Link2 size={13} /> {card.videoUrl || card.mediaId?.url || 'No media link'}
-                        </p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <button onClick={() => edit(card)} className="inline-flex items-center gap-1 rounded-xl bg-[#0f766e] px-3 py-2 text-xs font-black text-white"><Edit3 size={14} /> Edit</button>
-                        <button onClick={() => toggle(card)} className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-700">{card.active ? <EyeOff size={14} /> : <Eye size={14} />}{card.active ? 'Hide' : 'Show'}</button>
-                        <button onClick={() => remove(card)} className="inline-flex items-center gap-1 rounded-xl bg-[#ef4444] px-3 py-2 text-xs font-black text-white"><Trash2 size={14} /> Delete</button>
-                      </div>
-                    </div>
-                  </article>
-                )) : (
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-                    <p className="text-lg font-black text-slate-700">Abhi is section me card nahi hai.</p>
-                    <p className="mt-1 text-sm font-semibold text-slate-500">Left side form se pehla card add karo.</p>
-                  </div>
-                )}
-              </div>
-            </div>
 
-            <div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="text-2xl font-black">All Website Cards</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">Har section me kitne cards hain, quick overview.</p>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {sections.map((section) => {
-                  const count = cards.filter((card) => card.sectionKey === section.key).length;
-                  return (
-                    <button key={section.key} onClick={() => chooseSection(section.key)} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left hover:border-[#0f766e]/50">
-                      <span>
-                        <span className="block font-black">{section.simpleName}</span>
-                        <span className="text-xs font-semibold text-slate-500">{section.label}</span>
-                      </span>
-                      <span className="rounded-full bg-white px-3 py-1 text-sm font-black text-[#0f766e]">{count}</span>
-                    </button>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg font-black">
+                              {slot.label} — “{draft.title || slot.title}” card
+                            </h3>
+                            {card ? (
+                              <span className="text-sm font-black text-emerald-600">Saved</span>
+                            ) : (
+                              <span className="text-sm font-black text-amber-600">Empty</span>
+                            )}
+                            {card && !card.active ? <span className="text-sm font-black text-slate-400">Hidden</span> : null}
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-slate-400">
+                            {slot.type === 'image' ? 'Image URL paste karo' : 'YouTube URL, MP4 ya Wistia URL paste karo'} · Recommended {slot.width}x{slot.height}px
+                          </p>
+                          {card ? <p className="mt-1 break-all text-xs font-semibold text-slate-500">{card.videoUrl || card.mediaId?.url}</p> : null}
+
+                          <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                            <label className="grid gap-1">
+                              <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Headline</span>
+                              <input value={draft.title} onChange={(event) => updateDraft(slot.id, { title: event.target.value })} className="rounded-lg border border-slate-200 px-3 py-2 font-semibold outline-none focus:border-blue-500" />
+                            </label>
+                            <label className="grid gap-1">
+                              <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Niche ka text</span>
+                              <input value={draft.description} onChange={(event) => updateDraft(slot.id, { description: event.target.value })} className="rounded-lg border border-slate-200 px-3 py-2 font-semibold outline-none focus:border-blue-500" />
+                            </label>
+                          </div>
+
+                          <div className="mt-3 grid gap-3 xl:grid-cols-[1fr_120px_120px]">
+                            <label className="relative">
+                              <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                              <input
+                                value={draft.url}
+                                onChange={(event) => updateDraft(slot.id, { url: event.target.value })}
+                                placeholder="Image URL (imgbb.com) ya YouTube URL paste karo"
+                                className="w-full rounded-lg border border-slate-200 py-3 pl-10 pr-3 font-semibold outline-none focus:border-blue-500"
+                              />
+                            </label>
+                            <input
+                              value={draft.badgeText}
+                              onChange={(event) => updateDraft(slot.id, { badgeText: event.target.value })}
+                              placeholder="Badge"
+                              className="rounded-lg border border-slate-200 px-3 py-3 font-semibold outline-none focus:border-blue-500"
+                            />
+                            <input
+                              type="color"
+                              value={draft.borderColor || '#ff0000'}
+                              onChange={(event) => updateDraft(slot.id, { borderColor: event.target.value })}
+                              className="h-12 w-full rounded-lg border border-slate-200 bg-white p-1"
+                              title="Border color"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <input
+                            ref={(node) => { fileInputs.current[slot.id] = node; }}
+                            type="file"
+                            accept="image/*,video/*"
+                            className="hidden"
+                            onChange={(event) => uploadFile(slot, event)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputs.current[slot.id]?.click()}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white"
+                          >
+                            <Upload size={16} /> Upload
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => saveSlot(slot)}
+                            disabled={isSaving}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-black text-white disabled:opacity-60"
+                          >
+                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} URL Save
+                          </button>
+                          {card ? (
+                            <button
+                              type="button"
+                              onClick={() => toggle(slot)}
+                              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-600"
+                            >
+                              {card.active ? 'Hide' : 'Show'}
+                            </button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </article>
                   );
                 })}
               </div>
-            </div>
-          </section>
+            </section>
+          ))}
         </div>
       </section>
     </main>
