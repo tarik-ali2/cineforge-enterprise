@@ -1,5 +1,3 @@
-const serverless = require('serverless-http');
-
 let handlerPromise;
 
 function normalizeUrl(req, prefix) {
@@ -18,7 +16,6 @@ async function getHandler() {
   if (!handlerPromise) {
     handlerPromise = import('../apps/api/dist/app.js')
       .then(({ createApp }) => createApp({ serveStaticMedia: false }))
-      .then((app) => serverless(app));
   }
   return handlerPromise;
 }
