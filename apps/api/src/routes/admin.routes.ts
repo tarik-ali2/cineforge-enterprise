@@ -37,10 +37,33 @@ adminRouter.get('/settings', requirePermission('manage_settings'), async (_req, 
 
 adminRouter.put('/settings/:group/:key', requirePermission('manage_settings'), async (req, res) => {
   res.json(await Setting.findOneAndUpdate(
-    { group: req.params.group, key: req.params.key },
-    { value: req.body.value, secure: Boolean(req.body.secure) },
+    { key: req.params.key },
+    { group: req.params.group, key: req.params.key, value: req.body.value, encrypted: Boolean(req.body.secure) },
     { new: true, upsert: true }
   ));
+});
+
+adminRouter.put('/settings', requirePermission('manage_settings'), async (req, res, next) => {
+  try {
+    const body = z.object({
+      settings: z.array(z.object({
+        group: z.string().min(1),
+        key: z.string().min(1),
+        value: z.any().optional(),
+        secure: z.boolean().optional()
+      })).min(1)
+    }).parse(req.body);
+
+    const saved = [];
+    for (const item of body.settings) {
+      saved.push(await Setting.findOneAndUpdate(
+        { key: item.key },
+        { group: item.group, key: item.key, value: item.value ?? '', encrypted: Boolean(item.secure) },
+        { new: true, upsert: true }
+      ));
+    }
+    res.json({ ok: true, saved });
+  } catch (error) { next(error); }
 });
 
 adminRouter.get('/audit-logs', requirePermission('manage_settings'), async (_req, res) => {

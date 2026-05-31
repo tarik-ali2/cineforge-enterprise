@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 const settingSchema = new Schema({
+  group: { type: String, default: 'general', index: true },
   key: { type: String, required: true, unique: true },
   value: Schema.Types.Mixed,
   encrypted: { type: Boolean, default: false }
@@ -17,4 +18,3 @@ const auditLogSchema = new Schema({
 
 export const Setting = model('Setting', settingSchema);
 export const AuditLog = model('AuditLog', auditLogSchema);
-

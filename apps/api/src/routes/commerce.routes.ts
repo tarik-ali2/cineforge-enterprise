@@ -4,10 +4,33 @@ import { z } from 'zod';
 import { env, isProduction } from '../config/env.js';
 import { requireAuth, requirePermission } from '../middleware/auth.js';
 import { CheckoutOffer, Order } from '../models/Commerce.js';
+import { Setting } from '../models/System.js';
 import { sendMetaPurchaseEvent } from '../services/meta.service.js';
 
 export const commerceRouter = Router();
 const currency = 'INR';
+
+async function getCheckoutSettings(amount: number) {
+  const settings = await Setting.find({
+    key: {
+      $in: [
+        'provider',
+        'external_checkout_url',
+        'success_redirect_url',
+        'checkout_url_199',
+        'checkout_url_348',
+        'checkout_url_495'
+      ]
+    }
+  }).lean();
+  const map = Object.fromEntries(settings.map((setting) => [setting.key, String(setting.value ?? '')]));
+  const amountLink = map[`checkout_url_${amount}`];
+  return {
+    provider: map.provider || env.PAYMENT_PROVIDER,
+    checkoutUrl: amountLink || map.external_checkout_url || env.EXTERNAL_CHECKOUT_URL,
+    successRedirectUrl: map.success_redirect_url || env.PAYMENT_SUCCESS_REDIRECT_URL || `${env.WEB_URL}/thank-you?paid=1`
+  };
+}
 
 commerceRouter.get('/offers', async (_req, res) => {
   res.json(await CheckoutOffer.find({ active: true }).sort({ sortOrder: 1 }).lean());
@@ -28,9 +51,12 @@ async function createOrder(req: any, res: any, next: any) {
 
     const orderCode = 'CF-' + nanoid(10).toUpperCase();
     const eventId = `purchase_${orderCode}_${nanoid(8)}`;
-    const successRedirectUrl = env.PAYMENT_SUCCESS_REDIRECT_URL ?? `${env.WEB_URL}/thank-you?paid=1`;
-    const checkoutUrl = env.EXTERNAL_CHECKOUT_URL
-      ? `${env.EXTERNAL_CHECKOUT_URL}${env.EXTERNAL_CHECKOUT_URL.includes('?') ? '&' : '?'}order_id=${encodeURIComponent(orderCode)}&amount=${body.amount}&success_url=${encodeURIComponent(`${successRedirectUrl}&order=${orderCode}&event_id=${eventId}`)}`
+    const paymentSettings = await getCheckoutSettings(body.amount);
+    const successRedirectUrl = paymentSettings.successRedirectUrl.startsWith('http')
+      ? paymentSettings.successRedirectUrl
+      : `${env.WEB_URL}${paymentSettings.successRedirectUrl.startsWith('/') ? '' : '/'}${paymentSettings.successRedirectUrl}`;
+    const checkoutUrl = paymentSettings.checkoutUrl
+      ? `${paymentSettings.checkoutUrl}${paymentSettings.checkoutUrl.includes('?') ? '&' : '?'}order_id=${encodeURIComponent(orderCode)}&amount=${body.amount}&success_url=${encodeURIComponent(`${successRedirectUrl}&order=${orderCode}&event_id=${eventId}`)}`
       : '';
 
     const order = await Order.create({
@@ -38,8 +64,8 @@ async function createOrder(req: any, res: any, next: any) {
       orderCode,
       eventId,
       currency,
-      paymentMethod: env.PAYMENT_PROVIDER === 'manual_upi' ? 'upi_manual' : 'external',
-      paymentProvider: env.PAYMENT_PROVIDER,
+      paymentMethod: paymentSettings.provider === 'manual_upi' ? 'upi_manual' : 'external',
+      paymentProvider: paymentSettings.provider,
       status: checkoutUrl ? 'payment_started' : 'pending',
       successRedirectUrl,
       checkoutUrl
@@ -52,7 +78,7 @@ async function createOrder(req: any, res: any, next: any) {
       currency,
       status: order.status,
       payment: {
-        provider: env.PAYMENT_PROVIDER,
+        provider: paymentSettings.provider,
         checkoutUrl,
         successRedirectUrl: `${successRedirectUrl}&order=${orderCode}&event_id=${eventId}`,
         webhookUrl: `${env.API_URL}/api/verify-payment`
