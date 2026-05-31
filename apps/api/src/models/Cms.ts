@@ -31,6 +31,8 @@ const cardSchema = new Schema({
   description: String,
   mediaId: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
   videoUrl: String,
+  badgeText: String,
+  borderColor: String,
   imageFit: { type: String, enum: ['cover', 'contain', 'fill'], default: 'cover' },
   recommendedWidth: Number,
   recommendedHeight: Number,
@@ -59,4 +61,3 @@ const mediaSchema = new Schema({
 export const CmsPage = model('CmsPage', pageSchema);
 export const LandingCard = model('LandingCard', cardSchema);
 export const MediaAsset = model('MediaAsset', mediaSchema);
-

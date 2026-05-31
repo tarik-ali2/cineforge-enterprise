@@ -51,6 +51,8 @@ cmsRouter.post('/cards', requirePermission('manage_content'), async (req, res, n
       description: z.string().optional(),
       mediaId: z.string().optional(),
       videoUrl: z.string().url().optional().or(z.literal('')),
+      badgeText: z.string().optional(),
+      borderColor: z.string().optional(),
       imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
       recommendedWidth: z.number().optional(),
       recommendedHeight: z.number().optional(),

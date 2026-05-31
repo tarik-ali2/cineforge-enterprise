@@ -38,6 +38,56 @@ const imageCards = [
   'AI Avatar Script Prompts',
   'Automation Templates'
 ];
+const marketPromptCards = [
+  {
+    title: 'Indian Wedding Invitation Prompt',
+    description: 'Editable invitation prompt cards for wedding invites, puja invites and family celebration creatives.',
+    imageUrl: '/digital-products.png',
+    videoUrl: '',
+    badgeText: 'Most Popular',
+    borderColor: '#ff0000'
+  },
+  {
+    title: 'Indian Wedding Photoshoot Prompt',
+    description: 'Portrait, couple shoot and cinematic pre-wedding prompt styles for AI image generation.',
+    imageUrl: '/cineforge-ai-bundle.png',
+    videoUrl: '',
+    badgeText: 'Trending',
+    borderColor: '#ff0000'
+  },
+  {
+    title: 'Royal Wedding Poster Prompt',
+    description: 'Luxury invitation, stage, couple portrait and premium Indian wedding poster prompt pack.',
+    imageUrl: '/digital-products.png',
+    videoUrl: '',
+    badgeText: 'Best Seller',
+    borderColor: '#ff0000'
+  },
+  {
+    title: 'Product Ad Creative Prompt',
+    description: 'Generate scroll-stopping ad images, offer posters and ecommerce creatives with ready prompts.',
+    imageUrl: '/cineforge-ai-bundle.png',
+    videoUrl: '',
+    badgeText: 'Most Popular',
+    borderColor: '#ff1f7a'
+  },
+  {
+    title: 'YouTube Thumbnail Prompt',
+    description: 'High CTR thumbnail prompt styles for creators, educators and faceless channels.',
+    imageUrl: '/digital-products.png',
+    videoUrl: '',
+    badgeText: 'Creator Pick',
+    borderColor: '#2563eb'
+  },
+  {
+    title: 'Instagram Reel Prompt',
+    description: 'Reel visuals, caption hooks and creative scenes for short-form content production.',
+    imageUrl: '/cineforge-ai-bundle.png',
+    videoUrl: '',
+    badgeText: 'Viral Pack',
+    borderColor: '#8b5cf6'
+  }
+];
 
 type PublicCard = {
   _id: string;
@@ -47,6 +97,8 @@ type PublicCard = {
   description?: string;
   videoUrl?: string;
   mediaId?: { url?: string; alt?: string };
+  badgeText?: string;
+  borderColor?: string;
 };
 const toolStyles = [
   'from-[#2563eb] via-[#7c3aed] to-[#facc15] text-white border-[#facc15]/60',
@@ -110,6 +162,18 @@ export function LandingPage() {
   const dynamicImageCards = useMemo(() => {
     const cards = cmsCards.filter((card) => card.sectionKey === 'image_cards' && card.mediaId?.url);
     return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: card.mediaId?.url || '/cineforge-ai-bundle.png', alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
+  }, [cmsCards]);
+
+  const dynamicMarketCards = useMemo(() => {
+    const cards = cmsCards.filter((card) => card.sectionKey === 'market_cards' && (card.mediaId?.url || card.videoUrl));
+    return cards.length ? cards.map((card) => ({
+      title: card.title || 'Prompt Card',
+      description: card.description || 'Ready-to-copy prompt category for creators and businesses.',
+      imageUrl: card.mediaId?.url || '/cineforge-ai-bundle.png',
+      videoUrl: card.videoUrl || '',
+      badgeText: card.badgeText || 'Most Popular',
+      borderColor: card.borderColor || '#ff0000'
+    })) : marketPromptCards;
   }, [cmsCards]);
 
   return (
@@ -209,6 +273,50 @@ export function LandingPage() {
               <p className="mt-2 text-sm leading-6 text-white/62">Copy-ready prompts with output direction, style cues and content angles.</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section id="popular-cards" className="bg-[#f8fafc] py-12 text-[#111827]">
+        <div className="mx-auto max-w-7xl px-5">
+          <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.24em] text-[#e11d48]">Popular prompt cards</p>
+              <h2 className="mt-2 text-3xl font-black md:text-5xl">Ready-to-sell creative prompt sets</h2>
+              <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600">
+                Har card ka headline, border color, badge, image/video link aur niche ka text admin panel se editable hai.
+              </p>
+            </div>
+            <a href="/checkout" onClick={() => track('initiate_checkout', { source: 'popular_cards', value: 199, currency: 'INR', productName: 'CineForge AI Prompt Bundle' })} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#111827] px-6 py-3 font-black text-white shadow-[0_18px_50px_rgba(15,23,42,.18)]">
+              Access All Cards <ArrowRight size={18} />
+            </a>
+          </div>
+          <div className="grid gap-7 md:grid-cols-3">
+            {dynamicMarketCards.map((card) => (
+              <article key={card.title} className="relative rounded-[1.35rem] bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,.10)]">
+                <span className="absolute right-6 top-0 -translate-y-1/2 rounded-b-xl rounded-t-sm bg-gradient-to-r from-[#ec4899] to-[#6d28d9] px-4 py-2 text-sm font-black text-white shadow-[0_12px_26px_rgba(236,72,153,.32)]">
+                  {card.badgeText}
+                </span>
+                <h3 className="mb-5 min-h-[3.8rem] text-[1.35rem] font-black leading-tight text-slate-950 md:text-2xl">
+                  {card.title}
+                </h3>
+                <div className="relative overflow-hidden rounded-[1.1rem] border-[6px] bg-slate-100" style={{ borderColor: card.borderColor }}>
+                  <div className="relative aspect-[4/5]">
+                    <Image src={card.imageUrl} alt={card.title} fill className="object-cover" />
+                    {card.videoUrl ? (
+                      <div className="absolute inset-0 grid place-items-center bg-black/16">
+                        <span className="grid h-24 w-24 place-items-center rounded-xl bg-[#2456ff]/85 text-white shadow-[0_18px_48px_rgba(37,99,235,.35)]">
+                          <PlayCircle size={52} />
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+                <p className="mt-5 min-h-[4.5rem] text-sm font-semibold leading-6 text-slate-600">
+                  {card.description}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 

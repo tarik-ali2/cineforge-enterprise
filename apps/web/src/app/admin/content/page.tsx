@@ -15,6 +15,8 @@ type LandingCard = {
   description?: string;
   videoUrl?: string;
   mediaId?: MediaAsset;
+  badgeText?: string;
+  borderColor?: string;
   recommendedWidth?: number;
   recommendedHeight?: number;
   sortOrder?: number;
@@ -24,6 +26,7 @@ type LandingCard = {
 const sections = [
   { key: 'showcase_videos', label: 'Top Video Carousel', oldName: 'videoSlider', help: 'Landing page par upar wale reel format YouTube videos.', type: 'video', width: '1080', height: '1920' },
   { key: 'course_videos', label: 'Course Video Carousel', oldName: 'courseSlider', help: 'Recorded AI classes ke reel video cards.', type: 'course', width: '1080', height: '1920' },
+  { key: 'market_cards', label: 'Popular 3 Column Cards', oldName: 'marketCards', help: 'MarketSaleHub style cards: headline, image/video, red border aur niche text. Desktop par 3 cards ek row me aayenge.', type: 'image', width: '1080', height: '1350' },
   { key: 'image_cards', label: 'Image Card Carousel', oldName: 'categorySlider', help: 'Prompt bundle/product visual image cards.', type: 'image', width: '1200', height: '1500' },
   { key: 'prompt_categories', label: 'Prompt Category Cards', oldName: 'promptSlider', help: 'Small category cards for prompt sets.', type: 'image', width: '1200', height: '900' }
 ];
@@ -36,6 +39,8 @@ const initial = {
   description: '',
   videoUrl: '',
   imageUrl: '',
+  badgeText: 'Most Popular',
+  borderColor: '#ff0000',
   sortOrder: '0',
   active: true,
   recommendedWidth: '1080',
@@ -113,6 +118,8 @@ export default function AdminContentPage() {
       description: card.description || '',
       videoUrl: card.videoUrl || '',
       imageUrl: card.mediaId?.url || '',
+      badgeText: card.badgeText || 'Most Popular',
+      borderColor: card.borderColor || '#ff0000',
       sortOrder: String(card.sortOrder ?? 0),
       active: Boolean(card.active),
       recommendedWidth: String(card.recommendedWidth ?? section.width),
@@ -164,6 +171,8 @@ export default function AdminContentPage() {
       title: publicTitle,
       description: form.description,
       videoUrl: isVideo ? toEmbedUrl(form.videoUrl) : '',
+      badgeText: form.badgeText,
+      borderColor: form.borderColor,
       ...(mediaId ? { mediaId } : {}),
       targetSlot: currentSection.oldName,
       recommendedWidth: Number(form.recommendedWidth),
@@ -274,6 +283,17 @@ export default function AdminContentPage() {
                 <input value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} placeholder="Example: ChatGPT Mastery Course" className="rounded-xl border border-white/12 bg-[#0b1027] px-4 py-3 outline-none focus:border-cyan" />
               </label>
 
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="grid gap-2">
+                  <span className="text-sm font-black text-white/62">Badge Text</span>
+                  <input value={form.badgeText} onChange={(event) => setForm({ ...form, badgeText: event.target.value })} placeholder="Most Popular" className="rounded-xl border border-white/12 bg-[#0b1027] px-4 py-3 outline-none focus:border-cyan" />
+                </label>
+                <label className="grid gap-2">
+                  <span className="text-sm font-black text-white/62">Border Color</span>
+                  <input value={form.borderColor} onChange={(event) => setForm({ ...form, borderColor: event.target.value })} placeholder="#ff0000" className="rounded-xl border border-white/12 bg-[#0b1027] px-4 py-3 outline-none focus:border-cyan" />
+                </label>
+              </div>
+
               <label className="grid gap-2">
                 <span className="text-sm font-black text-white/62">Description / Tag</span>
                 <textarea value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} placeholder="Example: 62 recorded videos" className="min-h-[92px] rounded-xl border border-white/12 bg-[#0b1027] px-4 py-3 outline-none focus:border-cyan" />
@@ -356,6 +376,7 @@ export default function AdminContentPage() {
                         <td className="p-3">
                           <p className="font-black">{card.adminName}</p>
                           <p className="mt-1 text-sm text-white/60">{card.title}</p>
+                          <p className="mt-1 text-xs font-bold text-white/45">Badge: {card.badgeText || '-'} | Border: {card.borderColor || '-'}</p>
                           <p className="mt-2 flex max-w-[260px] items-center gap-1 break-all text-xs text-white/36"><Link2 size={13} /> {card.videoUrl || card.mediaId?.url || 'No media link'}</p>
                         </td>
                         <td className="p-3 text-sm font-bold text-white/78">{section?.label || card.sectionKey}</td>
