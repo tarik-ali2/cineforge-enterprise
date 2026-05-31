@@ -115,6 +115,18 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
+async function imageFileToDataUrl(file: File, maxSize = 1400) {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Image compression failed');
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/webp', 0.82);
+}
+
 export default function AdminContentPage() {
   const [cards, setCards] = useState<LandingCard[]>([]);
   const [drafts, setDrafts] = useState<Record<string, SlotDraft>>({});
@@ -198,7 +210,7 @@ export default function AdminContentPage() {
     const cardType: CardType = shouldBeVideo ? (slot.type === 'course' ? 'course' : 'video') : 'image';
 
     if (!url && !card?.mediaId?.url && !card?.videoUrl) {
-      setMessage(`${slot.label}: pehle Image URL ya YouTube link paste karo.`);
+      setMessage(`${slot.label}: ${slot.type === 'image' ? 'pehle image upload karo.' : 'pehle YouTube link paste karo.'}`);
       return;
     }
 
@@ -207,7 +219,7 @@ export default function AdminContentPage() {
 
     try {
       let mediaId = uploadedMedia?._id || '';
-      if (!shouldBeVideo && url && url !== card?.mediaId?.url) {
+      if (!shouldBeVideo && url && url !== card?.mediaId?.url && !uploadedMedia) {
         mediaId = (await createMediaLink(slot, url, title))._id;
       }
 
@@ -249,27 +261,29 @@ export default function AdminContentPage() {
     const file = event.target.files?.[0];
     if (!file) return;
     const draft = drafts[slot.id];
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('folder', slot.sectionKey);
-    formData.append('title', draft?.title || slot.title);
-    formData.append('alt', draft?.title || slot.title);
+
+    if (slot.type !== 'image') {
+      setMessage(`${slot.label}: video card me upload nahi, sirf YouTube link paste karo.`);
+      event.target.value = '';
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      setMessage(`${slot.label}: sirf image upload karo.`);
+      event.target.value = '';
+      return;
+    }
 
     setSavingSlot(slot.id);
-    setMessage(`${slot.label} upload ho raha hai...`);
+    setMessage(`${slot.label} image upload ho rahi hai...`);
 
     try {
-      const response = await fetch(`${API_URL}/api/cms/media`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      });
-      if (!response.ok) throw new Error('Upload failed');
-      const media = (await response.json()) as MediaAsset;
+      const dataUrl = await imageFileToDataUrl(file);
+      const media = await createMediaLink(slot, dataUrl, draft?.title || slot.title);
       updateDraft(slot.id, { url: media.url });
       await saveSlot(slot, media);
     } catch {
-      setMessage('Upload failed. Vercel par permanent image ke liye imgbb.com URL use karo.');
+      setMessage('Image upload failed. Image chhoti karke dobara try karo.');
     } finally {
       setSavingSlot('');
       event.target.value = '';
@@ -300,7 +314,7 @@ export default function AdminContentPage() {
               </p>
               <h1 className="mt-2 text-3xl font-black">Landing Page Card Manager</h1>
               <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-500">
-                Har card ka fixed box neeche diya hai. Image URL ya YouTube link paste karo, headline edit karo, phir URL Save dabao.
+                Image cards me image upload karo. Video cards me YouTube link paste karo, phir Save dabao.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -316,8 +330,8 @@ export default function AdminContentPage() {
 
         <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-slate-700">
           <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Recommended:</strong> 1080x1080px square cards, reels ke liye 1080x1920px.</p>
-          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Format:</strong> JPG, PNG, WebP, MP4, YouTube URL ya Wistia URL.</p>
-          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Best flow:</strong> imgbb.com par image upload karo, “Direct link” copy karo, URL box me paste karo, URL Save dabao.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Image cards:</strong> JPG, PNG ya WebP upload karo.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Video cards:</strong> YouTube link paste karo aur Save YouTube dabao.</p>
         </div>
 
         {message ? (
@@ -333,7 +347,7 @@ export default function AdminContentPage() {
                 <div>
                   <h2 className="text-2xl font-black">{group}</h2>
                   <p className="mt-1 text-sm font-semibold text-slate-500">
-                    {items.length} fixed slots. Title, border, badge aur URL editable hain.
+                    {items.length} fixed slots. Image cards me upload, video cards me YouTube link.
                   </p>
                 </div>
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">
@@ -380,7 +394,7 @@ export default function AdminContentPage() {
                             {card && !card.active ? <span className="text-sm font-black text-slate-400">Hidden</span> : null}
                           </div>
                           <p className="mt-1 text-sm font-semibold text-slate-400">
-                            {slot.type === 'image' ? 'Image URL paste karo' : 'YouTube URL, MP4 ya Wistia URL paste karo'} · Recommended {slot.width}x{slot.height}px
+                            {slot.type === 'image' ? 'Image upload karo' : 'YouTube link paste karo'} - Recommended {slot.width}x{slot.height}px
                           </p>
                           {card ? <p className="mt-1 break-all text-xs font-semibold text-slate-500">{card.videoUrl || card.mediaId?.url}</p> : null}
 
@@ -395,16 +409,18 @@ export default function AdminContentPage() {
                             </label>
                           </div>
 
-                          <div className="mt-3 grid gap-3 xl:grid-cols-[1fr_120px_120px]">
-                            <label className="relative">
-                              <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                              <input
-                                value={draft.url}
-                                onChange={(event) => updateDraft(slot.id, { url: event.target.value })}
-                                placeholder="Image URL (imgbb.com) ya YouTube URL paste karo"
-                                className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
-                              />
-                            </label>
+                          <div className={`mt-3 grid gap-3 ${slot.type === 'image' ? 'xl:grid-cols-[120px_120px]' : 'xl:grid-cols-[1fr_120px_120px]'}`}>
+                            {slot.type !== 'image' ? (
+                              <label className="relative">
+                                <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                  value={draft.url}
+                                  onChange={(event) => updateDraft(slot.id, { url: event.target.value })}
+                                  placeholder="YouTube video link paste karo"
+                                  className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
+                                />
+                              </label>
+                            ) : null}
                             <input
                               value={draft.badgeText}
                               onChange={(event) => updateDraft(slot.id, { badgeText: event.target.value })}
@@ -425,24 +441,26 @@ export default function AdminContentPage() {
                           <input
                             ref={(node) => { fileInputs.current[slot.id] = node; }}
                             type="file"
-                            accept="image/*,video/*"
+                            accept={slot.type === 'image' ? 'image/*' : undefined}
                             className="hidden"
                             onChange={(event) => uploadFile(slot, event)}
                           />
-                          <button
-                            type="button"
-                            onClick={() => fileInputs.current[slot.id]?.click()}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white"
-                          >
-                            <Upload size={16} /> Upload
-                          </button>
+                          {slot.type === 'image' ? (
+                            <button
+                              type="button"
+                              onClick={() => fileInputs.current[slot.id]?.click()}
+                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white"
+                            >
+                              <Upload size={16} /> Upload Image
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             onClick={() => saveSlot(slot)}
                             disabled={isSaving}
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-black text-white disabled:opacity-60"
                           >
-                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} URL Save
+                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} {slot.type === 'image' ? 'Save Text' : 'Save YouTube'}
                           </button>
                           {card ? (
                             <button

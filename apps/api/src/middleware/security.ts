@@ -22,8 +22,8 @@ export function applySecurity(app: Express) {
     credentials: true
   }));
   app.use(cookieParser(env.COOKIE_SECRET));
-  app.use(express.json({ limit: '1mb', type: ['application/json', 'text/plain'] }));
-  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+  app.use(express.json({ limit: '6mb', type: ['application/json', 'text/plain'] }));
+  app.use(express.urlencoded({ extended: true, limit: '6mb' }));
   app.use(compression());
   app.use(hpp());
   app.use(mongoSanitize());

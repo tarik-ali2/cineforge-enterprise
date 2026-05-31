@@ -81,7 +81,7 @@ cmsRouter.post('/media/link', requirePermission('manage_media'), async (req, res
   try {
     const body = z.object({
       folder: z.string().default('external'),
-      url: z.string().url(),
+      url: z.string().refine((value) => value.startsWith('data:image/') || /^https?:\/\//.test(value), 'Valid image URL or uploaded image data is required'),
       title: z.string().min(2),
       alt: z.string().optional(),
       caption: z.string().optional(),
