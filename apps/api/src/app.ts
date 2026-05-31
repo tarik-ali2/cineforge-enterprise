@@ -11,8 +11,6 @@ import { marketingRouter } from './routes/marketing.routes.js';
 import { publicRouter } from './routes/public.routes.js';
 
 export async function createApp(options: { serveStaticMedia?: boolean } = {}) {
-  await connectDb();
-
   const app = express();
   applySecurity(app);
 
@@ -28,6 +26,16 @@ export async function createApp(options: { serveStaticMedia?: boolean } = {}) {
   }
 
   app.use('/api/public', publicRouter);
+
+  app.use('/api', async (_req, _res, next) => {
+    try {
+      await connectDb();
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.use('/api/auth', authRouter);
   app.use('/api/admin', adminRouter);
   app.use('/api/cms', cmsRouter);

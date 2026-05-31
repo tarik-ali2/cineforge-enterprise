@@ -6,6 +6,7 @@ let connection: typeof mongoose | null = null;
 export async function connectDb() {
   if (connection) return connection;
   mongoose.set('strictQuery', true);
+  mongoose.set('bufferCommands', false);
   connection = await mongoose.connect(env.MONGODB_URI, {
     autoIndex: env.NODE_ENV !== 'production',
     maxPoolSize: 20,
@@ -13,4 +14,3 @@ export async function connectDb() {
   });
   return connection;
 }
-
