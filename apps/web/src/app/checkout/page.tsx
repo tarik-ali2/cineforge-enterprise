@@ -13,7 +13,6 @@ const defaultOffers = [
 
 export default function CheckoutPage() {
   const [selected, setSelected] = useState(() => new Set(defaultOffers.map((offer) => offer.id)));
-  const [customer, setCustomer] = useState({ name: '', email: '', phone: '' });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const total = useMemo(() => defaultOffers.filter((offer) => selected.has(offer.id)).reduce((sum, offer) => sum + offer.price, 0), [selected]);
@@ -26,10 +25,6 @@ export default function CheckoutPage() {
 
   async function startPayment() {
     const items = defaultOffers.filter((offer) => selected.has(offer.id));
-    if (!customer.name || !customer.email || !customer.phone) {
-      setMessage('Name, email and phone are required before payment.');
-      return;
-    }
     if (!items.length) {
       setMessage('Select at least one offer.');
       return;
@@ -49,7 +44,14 @@ export default function CheckoutPage() {
       const response = await fetch(`${API_URL}/api/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...customer, items, amount: total, utm: getStoredUtm() })
+        body: JSON.stringify({
+          name: 'Payment Page Customer',
+          email: `customer-${Date.now()}@cineforge.ai`,
+          phone: '0000000000',
+          items,
+          amount: total,
+          utm: getStoredUtm()
+        })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? 'Order creation failed');
@@ -76,14 +78,8 @@ export default function CheckoutPage() {
     <main className="premium-bg min-h-screen px-4 py-8">
       <section className="mx-auto max-w-3xl rounded-3xl border border-white/12 bg-white/95 p-5 text-ink shadow-glow md:p-8">
         <p className="text-sm font-black uppercase tracking-[0.24em] text-[#1264ff]">Secure checkout</p>
-        <h1 className="mt-2 text-4xl font-black">Choose your bundle</h1>
-        <p className="mt-3 text-slate-600">Payment starts after a server order is created. Purchase tracking fires only after verified payment success.</p>
-
-        <div className="mt-6 grid gap-3 md:grid-cols-3">
-          <input value={customer.name} onChange={(event) => setCustomer({ ...customer, name: event.target.value })} placeholder="Full name" className="rounded-xl border border-slate-300 px-4 py-3 text-slate-950 outline-none focus:border-[#1264ff]" />
-          <input value={customer.email} onChange={(event) => setCustomer({ ...customer, email: event.target.value })} placeholder="Email" type="email" className="rounded-xl border border-slate-300 px-4 py-3 text-slate-950 outline-none focus:border-[#1264ff]" />
-          <input value={customer.phone} onChange={(event) => setCustomer({ ...customer, phone: event.target.value })} placeholder="Phone" className="rounded-xl border border-slate-300 px-4 py-3 text-slate-950 outline-none focus:border-[#1264ff]" />
-        </div>
+        <h1 className="mt-2 text-4xl font-black">Confirm your bundle</h1>
+        <p className="mt-3 text-slate-600">Select your offer. Name, email and phone will be collected on the payment page.</p>
 
         <div className="mt-6 space-y-4">
           {defaultOffers.map((offer) => (
