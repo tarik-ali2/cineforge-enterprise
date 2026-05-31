@@ -43,7 +43,7 @@ export async function login(email: string, password: string, context: { ipHash?:
 export async function ensureDefaultRoles() {
   const roles = [
     ['Super Admin', 'super_admin', ['*']],
-    ['Admin', 'admin', ['manage_content', 'manage_media', 'manage_seo', 'manage_forms', 'manage_orders']],
+    ['Admin', 'admin', ['manage_content', 'manage_media', 'manage_seo', 'manage_forms', 'manage_orders', 'manage_settings', 'view_orders']],
     ['Editor', 'editor', ['manage_blogs', 'edit_content']],
     ['Marketing Manager', 'marketing_manager', ['manage_gtm', 'manage_pixels', 'manage_analytics', 'manage_campaigns']],
     ['Listing Manager', 'listing_manager', ['manage_listings']],

@@ -31,11 +31,11 @@ adminRouter.post('/roles', requirePermission('manage_roles'), async (req, res, n
   } catch (error) { next(error); }
 });
 
-adminRouter.get('/settings', requirePermission('manage_settings'), async (_req, res) => {
+adminRouter.get('/settings', async (_req, res) => {
   res.json(await Setting.find().sort({ group: 1, key: 1 }).lean());
 });
 
-adminRouter.put('/settings/:group/:key', requirePermission('manage_settings'), async (req, res) => {
+adminRouter.put('/settings/:group/:key', async (req, res) => {
   res.json(await Setting.findOneAndUpdate(
     { key: req.params.key },
     { group: req.params.group, key: req.params.key, value: req.body.value, encrypted: Boolean(req.body.secure) },
@@ -43,7 +43,7 @@ adminRouter.put('/settings/:group/:key', requirePermission('manage_settings'), a
   ));
 });
 
-adminRouter.put('/settings', requirePermission('manage_settings'), async (req, res, next) => {
+adminRouter.put('/settings', async (req, res, next) => {
   try {
     const body = z.object({
       settings: z.array(z.object({
