@@ -5,3 +5,5 @@ dist
 storage
 npm-debug.log*
 .netlify
+
+.vercel
