@@ -289,7 +289,7 @@ export default function AdminContentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f3f6fb] text-[#0f172a] md:pl-[250px]">
+    <main className="min-h-screen bg-[#f3f6fb] text-[#0f172a] md:pl-[250px]" style={{ colorScheme: 'light' }}>
       <AdminNav />
       <section className="px-4 py-5 sm:px-8">
         <header className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -387,11 +387,11 @@ export default function AdminContentPage() {
                           <div className="mt-4 grid gap-3 xl:grid-cols-2">
                             <label className="grid gap-1">
                               <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Headline</span>
-                              <input value={draft.title} onChange={(event) => updateDraft(slot.id, { title: event.target.value })} className="rounded-lg border border-slate-200 px-3 py-2 font-semibold outline-none focus:border-blue-500" />
+                              <input value={draft.title} onChange={(event) => updateDraft(slot.id, { title: event.target.value })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500" />
                             </label>
                             <label className="grid gap-1">
                               <span className="text-xs font-black uppercase tracking-[0.12em] text-slate-500">Niche ka text</span>
-                              <input value={draft.description} onChange={(event) => updateDraft(slot.id, { description: event.target.value })} className="rounded-lg border border-slate-200 px-3 py-2 font-semibold outline-none focus:border-blue-500" />
+                              <input value={draft.description} onChange={(event) => updateDraft(slot.id, { description: event.target.value })} className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500" />
                             </label>
                           </div>
 
@@ -402,14 +402,14 @@ export default function AdminContentPage() {
                                 value={draft.url}
                                 onChange={(event) => updateDraft(slot.id, { url: event.target.value })}
                                 placeholder="Image URL (imgbb.com) ya YouTube URL paste karo"
-                                className="w-full rounded-lg border border-slate-200 py-3 pl-10 pr-3 font-semibold outline-none focus:border-blue-500"
+                                className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
                               />
                             </label>
                             <input
                               value={draft.badgeText}
                               onChange={(event) => updateDraft(slot.id, { badgeText: event.target.value })}
                               placeholder="Badge"
-                              className="rounded-lg border border-slate-200 px-3 py-3 font-semibold outline-none focus:border-blue-500"
+                              className="rounded-lg border border-slate-200 bg-white px-3 py-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
                             />
                             <input
                               type="color"
