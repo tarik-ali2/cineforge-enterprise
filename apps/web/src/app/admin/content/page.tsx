@@ -60,12 +60,12 @@ type SlotDraft = {
 };
 
 const slots: Slot[] = [
-  { id: 'cat1', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 1', title: 'Indian Wedding Invitation Prompt', description: 'Premium invitation prompt card.', type: 'image', width: 1080, height: 1080, badgeText: 'Most Popular', borderColor: '#ff0000', sortOrder: 1 },
-  { id: 'cat2', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 2', title: 'Indian Wedding Photoshoot Prompt', description: 'Couple photoshoot and cinematic wedding prompt.', type: 'image', width: 1080, height: 1080, badgeText: 'Trending', borderColor: '#ff0000', sortOrder: 2 },
-  { id: 'cat3', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 3', title: 'Commercial Brand Campaign Prompt', description: 'Product ad, brand campaign and creative visuals.', type: 'image', width: 1080, height: 1080, badgeText: 'Best Seller', borderColor: '#ff0000', sortOrder: 3 },
-  { id: 'cat4', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 4', title: 'Birthday Celebration Prompt', description: 'Birthday poster and celebration video prompt.', type: 'image', width: 1080, height: 1080, badgeText: 'Popular', borderColor: '#ff1f7a', sortOrder: 4 },
-  { id: 'cat5', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 5', title: 'Real Estate Promo Prompt', description: 'Property, interior and real estate ad prompts.', type: 'image', width: 1080, height: 1080, badgeText: 'Creator Pick', borderColor: '#2563eb', sortOrder: 5 },
-  { id: 'cat6', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 6', title: 'Fashion Product Shoot Prompt', description: 'Fashion, model and premium product shoot prompts.', type: 'image', width: 1080, height: 1080, badgeText: 'Viral Pack', borderColor: '#8b5cf6', sortOrder: 6 },
+  { id: 'cat1', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 1', title: 'Indian Wedding Invitation Prompt', description: 'Premium invitation prompt card.', type: 'image', width: 1080, height: 1920, badgeText: 'Most Popular', borderColor: '#ff0000', sortOrder: 1 },
+  { id: 'cat2', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 2', title: 'Indian Wedding Photoshoot Prompt', description: 'Couple photoshoot and cinematic wedding prompt.', type: 'image', width: 1080, height: 1920, badgeText: 'Trending', borderColor: '#ff0000', sortOrder: 2 },
+  { id: 'cat3', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 3', title: 'Commercial Brand Campaign Prompt', description: 'Product ad, brand campaign and creative visuals.', type: 'image', width: 1080, height: 1920, badgeText: 'Best Seller', borderColor: '#ff0000', sortOrder: 3 },
+  { id: 'cat4', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 4', title: 'Birthday Celebration Prompt', description: 'Birthday poster and celebration video prompt.', type: 'image', width: 1080, height: 1920, badgeText: 'Popular', borderColor: '#ff1f7a', sortOrder: 4 },
+  { id: 'cat5', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 5', title: 'Real Estate Promo Prompt', description: 'Property, interior and real estate ad prompts.', type: 'image', width: 1080, height: 1920, badgeText: 'Creator Pick', borderColor: '#2563eb', sortOrder: 5 },
+  { id: 'cat6', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 6', title: 'Fashion Product Shoot Prompt', description: 'Fashion, model and premium product shoot prompts.', type: 'image', width: 1080, height: 1920, badgeText: 'Viral Pack', borderColor: '#8b5cf6', sortOrder: 6 },
 
   { id: 'topv1', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 1', title: 'Cinematic Product Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 1 },
   { id: 'topv2', sectionKey: 'showcase_videos', group: 'Top Reel Video Slider', label: 'Top Video 2', title: 'AI Prompt Demo Reel', description: 'Landing page ke upar wale reel card.', type: 'video', width: 1080, height: 1920, sortOrder: 2 },
@@ -85,8 +85,8 @@ const slots: Slot[] = [
     title: `Prompt Bundle Image ${index + 1}`,
     description: 'Image slider card.',
     type: 'image' as CardType,
-    width: 1200,
-    height: 1500,
+    width: 1080,
+    height: 1920,
     badgeText: '',
     borderColor: '#ff0000',
     sortOrder: index + 1
@@ -115,7 +115,7 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
-async function imageFileToDataUrl(file: File, maxSize = 1400) {
+async function imageFileToDataUrl(file: File, maxSize = 1080) {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
@@ -124,7 +124,7 @@ async function imageFileToDataUrl(file: File, maxSize = 1400) {
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Image compression failed');
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL('image/webp', 0.82);
+  return canvas.toDataURL('image/webp', 0.72);
 }
 
 export default function AdminContentPage() {
@@ -329,7 +329,7 @@ export default function AdminContentPage() {
         </header>
 
         <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-slate-700">
-          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Recommended:</strong> 1080x1080px square cards, reels ke liye 1080x1920px.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Recommended:</strong> image aur reels dono ke liye 1080x1920px vertical format.</p>
           <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Image cards:</strong> JPG, PNG ya WebP upload karo.</p>
           <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Video cards:</strong> YouTube link paste karo aur Save YouTube dabao.</p>
         </div>
