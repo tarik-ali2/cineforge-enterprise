@@ -100,6 +100,11 @@ type PublicCard = {
   badgeText?: string;
   borderColor?: string;
 };
+
+function isVideoUrl(url: string) {
+  return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
+}
+
 const toolStyles = [
   'from-[#2563eb] via-[#7c3aed] to-[#facc15] text-white border-[#facc15]/60',
   'from-[#020617] via-[#334155] to-[#e0f2fe] text-white border-white/30',
@@ -160,8 +165,8 @@ export function LandingPage() {
   }, [cmsCards]);
 
   const dynamicImageCards = useMemo(() => {
-    const cards = cmsCards.filter((card) => card.sectionKey === 'image_cards' && card.mediaId?.url);
-    return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: card.mediaId?.url || '/cineforge-ai-bundle.png', alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
+    const cards = cmsCards.filter((card) => card.sectionKey === 'image_cards' && (card.mediaId?.url || card.videoUrl));
+    return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: card.mediaId?.url || card.videoUrl || '/cineforge-ai-bundle.png', alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
   }, [cmsCards]);
 
   const dynamicMarketCards = useMemo(() => {
@@ -169,8 +174,8 @@ export function LandingPage() {
     return cards.length ? cards.map((card) => ({
       title: card.title || 'Prompt Card',
       description: card.description || 'Ready-to-copy prompt category for creators and businesses.',
-      imageUrl: card.mediaId?.url || '/cineforge-ai-bundle.png',
-      videoUrl: card.videoUrl || '',
+      imageUrl: card.mediaId?.url || (!isVideoUrl(card.videoUrl || '') ? card.videoUrl : '') || '/cineforge-ai-bundle.png',
+      videoUrl: isVideoUrl(card.videoUrl || '') ? card.videoUrl || '' : '',
       badgeText: card.badgeText || 'Most Popular',
       borderColor: card.borderColor || '#ff0000'
     })) : marketPromptCards;

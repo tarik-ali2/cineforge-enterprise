@@ -209,13 +209,13 @@ export default function AdminContentPage() {
     return (await response.json()) as MediaAsset;
   }
 
-  async function saveSlot(slot: Slot, uploadedMedia?: MediaAsset) {
+  async function saveSlot(slot: Slot, uploadedMedia?: MediaAsset, overrideUrl?: string) {
     const draft = drafts[slot.id];
     const title = draft?.title?.trim() || slot.title;
     const description = draft?.description?.trim() || slot.description;
-    const url = draft?.url?.trim() || uploadedMedia?.url || '';
+    const url = overrideUrl || draft?.url?.trim() || uploadedMedia?.url || '';
     const card = cardsBySlot.get(slot.id);
-    const shouldBeVideo = slot.type !== 'image' || isVideoUrl(url);
+    const shouldBeVideo = slot.type !== 'image';
     const cardType: CardType = shouldBeVideo ? (slot.type === 'course' ? 'course' : 'video') : 'image';
 
     if (!url && !card?.mediaId?.url && !card?.videoUrl) {
@@ -228,9 +228,6 @@ export default function AdminContentPage() {
 
     try {
       let mediaId = uploadedMedia?._id || '';
-      if (!shouldBeVideo && url && url !== card?.mediaId?.url && !uploadedMedia) {
-        mediaId = (await createMediaLink(slot, url, title))._id;
-      }
 
       const payload = {
         sectionKey: slot.sectionKey,
@@ -240,7 +237,7 @@ export default function AdminContentPage() {
         description,
         badgeText: draft?.badgeText || slot.badgeText || '',
         borderColor: draft?.borderColor || slot.borderColor || '#ff0000',
-        videoUrl: shouldBeVideo ? toEmbedUrl(url || card?.videoUrl || '') : '',
+        videoUrl: shouldBeVideo ? toEmbedUrl(url || card?.videoUrl || '') : (url || card?.videoUrl || card?.mediaId?.url || ''),
         ...(mediaId ? { mediaId } : {}),
         targetSlot: slot.id,
         recommendedWidth: slot.width,
@@ -288,9 +285,8 @@ export default function AdminContentPage() {
 
     try {
       const dataUrl = await imageFileToDataUrl(file);
-      const media = await createMediaLink(slot, dataUrl, draft?.title || slot.title);
-      updateDraft(slot.id, { url: media.url });
-      await saveSlot(slot, media);
+      updateDraft(slot.id, { url: dataUrl });
+      await saveSlot(slot, undefined, dataUrl);
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error';
       setMessage(`Image upload failed: ${detail}. Dusri image try karo ya screenshot bhejo.`);
