@@ -353,14 +353,9 @@ export function LandingPage() {
         </div>
         <div ref={imageCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {(dynamicImageCards.length ? dynamicImageCards : imageCards.map((title, index) => ({ title, url: index % 2 === 0 ? '/cineforge-ai-bundle.png' : '/digital-products.png', alt: title }))).map((card) => (
-            <article key={card.title} className="min-w-[260px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 shadow-[0_18px_55px_rgba(0,0,0,.22)] sm:min-w-[310px]">
-              <div className="relative aspect-[4/5]">
-                <Image src={card.url} alt={card.alt} fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/10 to-transparent" />
-                <div className="absolute left-4 right-4 bottom-4">
-                  <p className="inline-flex items-center gap-2 rounded-full bg-neon px-3 py-1 text-xs font-black text-ink"><PlayCircle size={14} /> Prompt Set</p>
-                  <h3 className="mt-3 text-xl font-black leading-tight text-white">{card.title}</h3>
-                </div>
+            <article key={card.title} className="min-w-[82vw] snap-start overflow-hidden rounded-2xl border border-white/14 bg-black shadow-[0_18px_55px_rgba(0,0,0,.28)] sm:min-w-[300px] md:min-w-[315px]">
+              <div className="relative aspect-[9/16]">
+                <Image src={card.url} alt={card.alt} fill className="object-contain" />
               </div>
             </article>
           ))}
