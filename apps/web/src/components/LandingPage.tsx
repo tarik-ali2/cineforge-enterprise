@@ -276,8 +276,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="popular-cards" className="bg-[#f8fafc] py-12 text-[#111827]">
-        <div className="mx-auto max-w-7xl px-5">
+      <section id="popular-cards" className="bg-[#f8fafc] py-10 text-[#111827] md:py-12">
+        <div className="mx-auto max-w-7xl px-3 sm:px-5">
           <div className="mb-7 flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
               <p className="text-sm font-black uppercase tracking-[0.24em] text-[#e11d48]">Popular prompt cards</p>
@@ -290,17 +290,17 @@ export function LandingPage() {
               Access All Cards <ArrowRight size={18} />
             </a>
           </div>
-          <div className="grid gap-7 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-3 md:gap-7">
             {dynamicMarketCards.map((card) => (
-              <article key={card.title} className="relative rounded-[1.35rem] bg-white p-6 shadow-[0_22px_70px_rgba(15,23,42,.10)]">
-                <span className="absolute right-6 top-0 -translate-y-1/2 rounded-b-xl rounded-t-sm bg-gradient-to-r from-[#ec4899] to-[#6d28d9] px-4 py-2 text-sm font-black text-white shadow-[0_12px_26px_rgba(236,72,153,.32)]">
+              <article key={card.title} className="relative w-full rounded-[1.2rem] bg-white p-3 shadow-[0_18px_52px_rgba(15,23,42,.10)] sm:p-5 md:rounded-[1.35rem] md:p-5 xl:p-6">
+                <span className="absolute right-5 top-0 -translate-y-1/2 rounded-b-xl rounded-t-sm bg-gradient-to-r from-[#ec4899] to-[#6d28d9] px-3 py-2 text-xs font-black text-white shadow-[0_12px_26px_rgba(236,72,153,.32)] sm:px-4 sm:text-sm">
                   {card.badgeText}
                 </span>
-                <h3 className="mb-5 min-h-[3.8rem] text-[1.35rem] font-black leading-tight text-slate-950 md:text-2xl">
+                <h3 className="mb-4 min-h-0 text-[1.25rem] font-black leading-tight text-slate-950 sm:text-[1.35rem] md:min-h-[4.2rem] md:text-[1.45rem] xl:text-2xl">
                   {card.title}
                 </h3>
-                <div className="relative overflow-hidden rounded-[1.1rem] border-[6px] bg-slate-100" style={{ borderColor: card.borderColor }}>
-                  <div className="relative aspect-[4/5]">
+                <div className="relative overflow-hidden rounded-[1rem] border-[5px] bg-slate-100 sm:border-[6px] md:rounded-[1.1rem]" style={{ borderColor: card.borderColor }}>
+                  <div className="relative aspect-[9/16]">
                     <Image src={card.imageUrl} alt={card.title} fill className="object-cover" />
                     {card.videoUrl ? (
                       <div className="absolute inset-0 grid place-items-center bg-black/16">
@@ -311,7 +311,7 @@ export function LandingPage() {
                     ) : null}
                   </div>
                 </div>
-                <p className="mt-5 min-h-[4.5rem] text-sm font-semibold leading-6 text-slate-600">
+                <p className="mt-4 min-h-0 text-sm font-semibold leading-6 text-slate-600 md:min-h-[4.5rem]">
                   {card.description}
                 </p>
               </article>
