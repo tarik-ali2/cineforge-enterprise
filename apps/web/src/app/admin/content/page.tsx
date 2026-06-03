@@ -202,7 +202,10 @@ export default function AdminContentPage() {
         height: slot.height
       })
     });
-    if (!response.ok) throw new Error('Media URL save failed');
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(`Media URL save failed (${response.status}) ${detail.slice(0, 160)}`);
+    }
     return (await response.json()) as MediaAsset;
   }
 
@@ -321,7 +324,7 @@ export default function AdminContentPage() {
               </p>
               <h1 className="mt-2 text-3xl font-black">Landing Page Card Manager</h1>
               <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-500">
-                Image cards me image upload karo. Video cards me YouTube link paste karo, phir Save dabao.
+                Image cards me JPG/PNG direct URL paste karo ya upload try karo. Video cards me YouTube link paste karo, phir Save dabao.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -337,7 +340,7 @@ export default function AdminContentPage() {
 
         <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm leading-7 text-slate-700">
           <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Recommended:</strong> image aur reels dono ke liye 1080x1920px vertical format.</p>
-          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Image cards:</strong> JPG, PNG ya WebP upload karo.</p>
+          <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Image cards:</strong> JPG/PNG direct image URL paste karo. Upload bhi try kar sakte ho.</p>
           <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} /><strong>Video cards:</strong> YouTube link paste karo aur Save YouTube dabao.</p>
         </div>
 
@@ -416,8 +419,18 @@ export default function AdminContentPage() {
                             </label>
                           </div>
 
-                          <div className={`mt-3 grid gap-3 ${slot.type === 'image' ? 'xl:grid-cols-[120px_120px]' : 'xl:grid-cols-[1fr_120px_120px]'}`}>
-                            {slot.type !== 'image' ? (
+                          <div className={`mt-3 grid gap-3 ${slot.type === 'image' ? 'xl:grid-cols-[1fr_120px_120px]' : 'xl:grid-cols-[1fr_120px_120px]'}`}>
+                            {slot.type === 'image' ? (
+                              <label className="relative">
+                                <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                                <input
+                                  value={draft.url}
+                                  onChange={(event) => updateDraft(slot.id, { url: event.target.value })}
+                                  placeholder="JPG/PNG image direct URL paste karo"
+                                  className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
+                                />
+                              </label>
+                            ) : (
                               <label className="relative">
                                 <Link2 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                 <input
@@ -427,7 +440,7 @@ export default function AdminContentPage() {
                                   className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 font-semibold text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500"
                                 />
                               </label>
-                            ) : null}
+                            )}
                             <input
                               value={draft.badgeText}
                               onChange={(event) => updateDraft(slot.id, { badgeText: event.target.value })}
@@ -467,7 +480,7 @@ export default function AdminContentPage() {
                             disabled={isSaving}
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-black text-white disabled:opacity-60"
                           >
-                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} {slot.type === 'image' ? 'Save Text' : 'Save YouTube'}
+                            {isSaving ? <Loader2 className="animate-spin" size={16} /> : <Save size={16} />} {slot.type === 'image' ? 'Save URL/Text' : 'Save YouTube'}
                           </button>
                           {card ? (
                             <button
