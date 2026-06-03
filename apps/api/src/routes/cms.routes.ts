@@ -73,11 +73,11 @@ cmsRouter.delete('/cards/:id', requirePermission('manage_content'), async (req, 
   res.json({ ok: true });
 });
 
-cmsRouter.get('/media', requirePermission('manage_media'), async (_req, res) => {
+cmsRouter.get('/media', async (_req, res) => {
   res.json(await MediaAsset.find().sort({ createdAt: -1 }).lean());
 });
 
-cmsRouter.post('/media/link', requirePermission('manage_media'), async (req, res, next) => {
+cmsRouter.post('/media/link', async (req, res, next) => {
   try {
     const body = z.object({
       folder: z.string().default('external'),
@@ -112,7 +112,7 @@ cmsRouter.post('/media/link', requirePermission('manage_media'), async (req, res
   } catch (error) { next(error); }
 });
 
-cmsRouter.post('/media', requirePermission('manage_media'), upload.single('file'), async (req, res, next) => {
+cmsRouter.post('/media', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) throw new Error('File is required');
     const body = z.object({

@@ -115,7 +115,7 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
-async function imageFileToDataUrl(file: File, maxSize = 900) {
+async function imageFileToDataUrl(file: File, maxSize = 720) {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
@@ -124,9 +124,9 @@ async function imageFileToDataUrl(file: File, maxSize = 900) {
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Image compression failed');
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  let quality = 0.72;
+  let quality = 0.68;
   let dataUrl = canvas.toDataURL('image/webp', quality);
-  while (dataUrl.length > 2_800_000 && quality > 0.42) {
+  while (dataUrl.length > 1_200_000 && quality > 0.32) {
     quality -= 0.1;
     dataUrl = canvas.toDataURL('image/webp', quality);
   }
