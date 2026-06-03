@@ -91,12 +91,13 @@ cmsRouter.post('/media/link', requirePermission('manage_media'), async (req, res
       tags: z.string().optional()
     }).parse(req.body);
 
+    const isDataImage = body.url.startsWith('data:image/');
     const asset = await MediaAsset.create({
       folder: body.folder,
       originalName: body.title,
-      filename: body.url.split('/').pop() || body.title,
+      filename: isDataImage ? `${nanoid(12)}.webp` : (body.url.split('/').pop() || body.title),
       url: body.url,
-      mimeType: 'external/image',
+      mimeType: isDataImage ? 'image/webp' : 'external/image',
       width: body.width,
       height: body.height,
       alt: body.alt,

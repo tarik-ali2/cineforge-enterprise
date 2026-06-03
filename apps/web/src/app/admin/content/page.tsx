@@ -115,7 +115,7 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
-async function imageFileToDataUrl(file: File, maxSize = 1080) {
+async function imageFileToDataUrl(file: File, maxSize = 900) {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
@@ -124,7 +124,13 @@ async function imageFileToDataUrl(file: File, maxSize = 1080) {
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Image compression failed');
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL('image/webp', 0.72);
+  let quality = 0.72;
+  let dataUrl = canvas.toDataURL('image/webp', quality);
+  while (dataUrl.length > 2_800_000 && quality > 0.42) {
+    quality -= 0.1;
+    dataUrl = canvas.toDataURL('image/webp', quality);
+  }
+  return dataUrl;
 }
 
 export default function AdminContentPage() {
@@ -282,8 +288,9 @@ export default function AdminContentPage() {
       const media = await createMediaLink(slot, dataUrl, draft?.title || slot.title);
       updateDraft(slot.id, { url: media.url });
       await saveSlot(slot, media);
-    } catch {
-      setMessage('Image upload failed. Image chhoti karke dobara try karo.');
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'Unknown error';
+      setMessage(`Image upload failed: ${detail}. Dusri image try karo ya screenshot bhejo.`);
     } finally {
       setSavingSlot('');
       event.target.value = '';
