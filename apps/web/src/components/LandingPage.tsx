@@ -23,11 +23,6 @@ const showcaseVideos = [
   { title: 'Viral Hook Video', tag: 'Creator Script Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
   { title: 'Offer Promo Reel', tag: 'Sales Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
 ];
-const courseVideos = [
-  { title: 'ChatGPT Mastery', tag: '62 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-  { title: 'Prompt Engineering', tag: '33 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-  { title: 'SaaS ChatGPT Course', tag: '33 Videos', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
-];
 const imageCards = [
   'Google Gemini Image Prompts',
   'Video Creation Prompts',
@@ -171,7 +166,6 @@ function CarouselControls({ onLeft, onRight }: { onLeft: () => void; onRight: ()
 
 export function LandingPage() {
   const primaryVideos = useCarousel();
-  const courseVideoCarousel = useCarousel();
   const imageCarousel = useCarousel();
   const [cmsCards, setCmsCards] = useState<PublicCard[]>([]);
 
@@ -187,11 +181,6 @@ export function LandingPage() {
   const dynamicShowcaseVideos = useMemo(() => {
     const cards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl);
     return cards.length ? cards.map((card) => ({ title: card.title || 'Video Card', tag: card.description || 'AI video prompt', url: card.videoUrl || '' })) : showcaseVideos;
-  }, [cmsCards]);
-
-  const dynamicCourseVideos = useMemo(() => {
-    const cards = cmsCards.filter((card) => card.sectionKey === 'course_videos' && card.videoUrl);
-    return cards.length ? cards.map((card) => ({ title: card.title || 'Course Video', tag: card.description || 'Recorded class', url: card.videoUrl || '' })) : courseVideos;
   }, [cmsCards]);
 
   const dynamicImageCards = useMemo(() => {
@@ -352,29 +341,6 @@ export function LandingPage() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-5 py-10">
-        <div className="mb-5 flex items-end justify-between gap-5">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.28em] text-cyan">Recorded classes preview</p>
-            <h2 className="mt-2 text-4xl font-black">Course video cards</h2>
-          </div>
-          <CarouselControls onLeft={() => courseVideoCarousel.slide('left')} onRight={() => courseVideoCarousel.slide('right')} />
-        </div>
-        <div ref={courseVideoCarousel.ref} className="flex snap-x gap-4 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {dynamicCourseVideos.map((video) => (
-            <article key={video.title} className="min-w-[215px] snap-start overflow-hidden rounded-2xl border border-white/12 bg-white/8 sm:min-w-[260px]">
-              <div className="relative aspect-[9/16] bg-gradient-to-br from-cyan/25 via-black to-magenta/20">
-                <iframe src={video.url} title={video.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" />
-                <div className="pointer-events-none absolute inset-x-3 bottom-3 rounded-xl bg-black/70 p-3 backdrop-blur">
-                  <p className="text-sm font-black text-white">{video.title}</p>
-                  <p className="mt-1 text-xs font-bold text-cyan">{video.tag}</p>
-                </div>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
 
