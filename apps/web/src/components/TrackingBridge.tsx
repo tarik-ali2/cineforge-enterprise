@@ -7,7 +7,7 @@ export function TrackingBridge() {
   useEffect(() => {
     initMarketing().then(() => {
       track('page_view');
-      if (window.location.pathname === '/') track('view_content', { productName: 'CineForge AI Prompt Bundle' });
+      if (window.location.pathname === '/') track('view_content', { productName: 'CineForge AI Prompt Bundle', value: 199, currency: 'INR' });
     });
 
     const onClick = (event: MouseEvent) => {

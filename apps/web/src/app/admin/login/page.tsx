@@ -21,7 +21,11 @@ export default function AdminLoginPage() {
     const data = await response.json().catch(() => ({}));
     setMessage(response.ok ? 'Login success. Open dashboard.' : data?.error || 'Login failed. Check API and credentials.');
     if (response.ok) {
-      if (data?.accessToken) setAdminAccessToken(String(data.accessToken));
+      if (!data?.accessToken) {
+        setMessage('Login success but token missing. Please retry login.');
+        return;
+      }
+      setAdminAccessToken(String(data.accessToken));
       window.location.href = '/admin/dashboard';
     }
   }

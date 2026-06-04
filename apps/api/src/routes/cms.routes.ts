@@ -79,7 +79,7 @@ cmsRouter.post('/media/link', async (req, res, next) => {
   try {
     const body = z.object({
       folder: z.string().default('external'),
-      url: z.string().refine((value) => value.startsWith('data:image/') || /^https?:\/\//.test(value), 'Valid image URL or uploaded image data is required'),
+      url: z.string().url('Valid public image URL is required').refine((value) => /^https?:\/\//.test(value), 'Only public http/https image URLs are allowed'),
       title: z.string().min(2),
       alt: z.string().optional(),
       caption: z.string().optional(),
@@ -89,13 +89,12 @@ cmsRouter.post('/media/link', async (req, res, next) => {
       tags: z.string().optional()
     }).parse(req.body);
 
-    const isDataImage = body.url.startsWith('data:image/');
     const asset = await MediaAsset.create({
       folder: body.folder,
       originalName: body.title,
-      filename: isDataImage ? `${nanoid(12)}.webp` : (body.url.split('/').pop() || body.title),
+      filename: body.url.split('/').pop() || body.title,
       url: body.url,
-      mimeType: isDataImage ? 'image/webp' : 'external/image',
+      mimeType: 'external/image',
       width: body.width,
       height: body.height,
       alt: body.alt,
