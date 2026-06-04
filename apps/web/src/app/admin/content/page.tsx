@@ -59,6 +59,11 @@ type SlotDraft = {
   borderColor: string;
 };
 
+type UploadSettings = {
+  cloudinaryCloudName: string;
+  cloudinaryUploadPreset: string;
+};
+
 const slots: Slot[] = [
   { id: 'cat1', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 1', title: 'Indian Wedding Invitation Prompt', description: 'Premium invitation prompt card.', type: 'image', width: 1080, height: 1920, badgeText: 'Most Popular', borderColor: '#ff0000', sortOrder: 1 },
   { id: 'cat2', sectionKey: 'market_cards', group: 'Popular 3-Column Cards', label: 'Category 2', title: 'Indian Wedding Photoshoot Prompt', description: 'Couple photoshoot and cinematic wedding prompt.', type: 'image', width: 1080, height: 1920, badgeText: 'Trending', borderColor: '#ff0000', sortOrder: 2 },
@@ -115,9 +120,9 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
-async function uploadToCloudinary(file: File, folder: string) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+async function uploadToCloudinary(file: File, folder: string, settings: UploadSettings) {
+  const cloudName = settings.cloudinaryCloudName || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = settings.cloudinaryUploadPreset || process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
   if (!cloudName || !uploadPreset) {
     throw new Error('Cloudinary env missing hai. Abhi JPG/PNG direct URL paste karke Save URL/Text karo.');
   }
@@ -149,6 +154,7 @@ export default function AdminContentPage() {
   const [drafts, setDrafts] = useState<Record<string, SlotDraft>>({});
   const [message, setMessage] = useState('');
   const [savingSlot, setSavingSlot] = useState('');
+  const [uploadSettings, setUploadSettings] = useState<UploadSettings>({ cloudinaryCloudName: '', cloudinaryUploadPreset: '' });
   const fileInputs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const cardsBySlot = useMemo(() => {
@@ -166,10 +172,23 @@ export default function AdminContentPage() {
   })), []);
 
   async function load() {
-    const response = await adminFetch('/api/cms/cards');
+    const [response, settingsResponse] = await Promise.all([
+      adminFetch('/api/cms/cards'),
+      adminFetch('/api/admin/settings')
+    ]);
     if (!response.ok) {
       setMessage('Session expired lag rahi hai. Please admin login dobara karo.');
       return;
+    }
+    if (settingsResponse.ok) {
+      const settings = await settingsResponse.json();
+      if (Array.isArray(settings)) {
+        const map = Object.fromEntries(settings.map((setting) => [String(setting.key), String(setting.value ?? '')]));
+        setUploadSettings({
+          cloudinaryCloudName: String(map.cloudinary_cloud_name ?? ''),
+          cloudinaryUploadPreset: String(map.cloudinary_upload_preset ?? '')
+        });
+      }
     }
 
     const nextCards: LandingCard[] = await response.json();
@@ -277,7 +296,7 @@ export default function AdminContentPage() {
     setMessage(`${slot.label} image upload ho rahi hai...`);
 
     try {
-      const secureUrl = await uploadToCloudinary(file, slot.sectionKey);
+      const secureUrl = await uploadToCloudinary(file, slot.sectionKey, uploadSettings);
       updateDraft(slot.id, { url: secureUrl });
       await saveSlot(slot, undefined, secureUrl);
     } catch (error) {

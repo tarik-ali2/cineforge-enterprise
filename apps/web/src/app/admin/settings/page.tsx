@@ -39,6 +39,8 @@ const fields: Field[] = [
   { section: 'tracking', group: 'tracking', key: 'purchase_value', label: 'Purchase Value', defaultValue: '199', help: 'Thank-you Purchase event value.', },
   { section: 'tracking', group: 'tracking', key: 'currency', label: 'Currency', defaultValue: 'INR', help: 'Tracking currency, default INR.', },
   { section: 'tracking', group: 'tracking', key: 'thank_you_url', label: 'Thank You URL', defaultValue: '/thank-you?paid=1', help: 'Successful payment return URL.', },
+  { section: 'tracking', group: 'media', key: 'cloudinary_cloud_name', label: 'Cloudinary Cloud Name', defaultValue: '', help: 'Image upload ke liye Cloudinary cloud name.', },
+  { section: 'tracking', group: 'media', key: 'cloudinary_upload_preset', label: 'Cloudinary Upload Preset', defaultValue: '', help: 'Unsigned upload preset. JPG/PNG/WebP max 5MB.', },
   { section: 'thank_you', group: 'thank_you', key: 'download_content', label: 'Thank You Download Text', defaultValue: 'Your verified download link will appear here.', help: 'Paid customer ko thank-you page par dikhne wala text.', }
 ];
 
