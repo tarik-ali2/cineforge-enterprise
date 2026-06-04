@@ -21,7 +21,9 @@ const showcaseVideos = [
   { title: 'Faceless Shorts Pack', tag: 'Sora/Reel Format', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
   { title: 'Business Ad Reel', tag: 'InVideo Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
   { title: 'Viral Hook Video', tag: 'Creator Script Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
-  { title: 'Offer Promo Reel', tag: 'Sales Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
+  { title: 'Offer Promo Reel', tag: 'Sales Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'AI Avatar Reel', tag: 'Avatar Video Prompt', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' },
+  { title: 'Faceless Shorts Reel', tag: 'Shorts Prompt Pack', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ' }
 ];
 const imageCards = [
   'Google Gemini Image Prompts',
@@ -96,6 +98,8 @@ type PublicCard = {
   mediaId?: { url?: string; alt?: string };
   badgeText?: string;
   borderColor?: string;
+  sortOrder?: number;
+  targetSlot?: string;
 };
 
 function isVideoUrl(url: string) {
@@ -179,8 +183,11 @@ export function LandingPage() {
   }, []);
 
   const dynamicShowcaseVideos = useMemo(() => {
-    const cards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl);
-    return cards.length ? cards.map((card) => ({ title: card.title || 'Video Card', tag: card.description || 'AI video prompt', url: card.videoUrl || '' })) : showcaseVideos;
+    const editableCards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl && Number(card.sortOrder) >= 1 && Number(card.sortOrder) <= 8);
+    const legacyCards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl && (!card.sortOrder || Number(card.sortOrder) < 1));
+    const cardsByOrder = new Map(editableCards.map((card) => [Number(card.sortOrder), card]));
+    const orderedCards = Array.from({ length: 8 }, (_, index) => cardsByOrder.get(index + 1) || legacyCards.shift()).filter(Boolean) as PublicCard[];
+    return orderedCards.length ? orderedCards.map((card) => ({ title: card.title || 'Video Card', tag: card.description || 'AI video prompt', url: card.videoUrl || '' })) : showcaseVideos;
   }, [cmsCards]);
 
   const dynamicImageCards = useMemo(() => {
