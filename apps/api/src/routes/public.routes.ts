@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { connectDb } from '../db/mongoose.js';
-import { CmsPage, LandingCard } from '../models/Cms.js';
+import { CmsPage, LandingCard, MediaAsset } from '../models/Cms.js';
 import { CheckoutOffer } from '../models/Commerce.js';
 import { TrackingScript } from '../models/Marketing.js';
 import { Setting } from '../models/System.js';
@@ -26,6 +26,19 @@ publicRouter.get('/landing', async (_req, res) => {
     res.json({ page, cards, offers, settings: Object.fromEntries(settings.map((s) => [s.key, s.value])) });
   } catch (error) {
     res.json({ page: null, cards: [], offers: [], settings: {}, degraded: true });
+  }
+});
+
+publicRouter.get('/media/:id', async (req, res) => {
+  try {
+    await connectWithTimeout();
+    const asset = await MediaAsset.findById(req.params.id).select('+data').lean();
+    if (!asset?.data) return res.status(404).send('Media not found');
+    res.setHeader('Content-Type', asset.mimeType || 'image/webp');
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(asset.data);
+  } catch {
+    res.status(404).send('Media not found');
   }
 });
 

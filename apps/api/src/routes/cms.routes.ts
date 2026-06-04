@@ -1,6 +1,4 @@
 import { Router } from 'express';
-import { mkdir, writeFile } from 'node:fs/promises';
-import path from 'node:path';
 import multer from 'multer';
 import { nanoid } from 'nanoid';
 import sharp from 'sharp';
@@ -11,10 +9,10 @@ import { CmsPage, LandingCard, MediaAsset } from '../models/Cms.js';
 export const cmsRouter = Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (/^(image|video)\//.test(file.mimetype)) cb(null, true);
-    else cb(new Error('Only image and video uploads are allowed'));
+    if (['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype)) cb(null, true);
+    else cb(new Error('Only JPG, PNG and WebP uploads are allowed'));
   }
 });
 cmsRouter.use(requireAuth);
@@ -50,7 +48,7 @@ cmsRouter.post('/cards', requirePermission('manage_content'), async (req, res, n
       title: z.string().optional(),
       description: z.string().optional(),
       mediaId: z.string().optional(),
-      videoUrl: z.string().refine((value) => !value || value.startsWith('data:image/') || /^https?:\/\//.test(value), 'Valid URL is required').optional().or(z.literal('')),
+      videoUrl: z.string().refine((value) => !value || value.startsWith('/api/public/media/') || /^https?:\/\//.test(value), 'Valid URL is required').optional().or(z.literal('')),
       badgeText: z.string().optional(),
       borderColor: z.string().optional(),
       imageFit: z.enum(['cover', 'contain', 'fill']).default('cover'),
@@ -124,33 +122,26 @@ cmsRouter.post('/media', upload.single('file'), async (req, res, next) => {
       tags: z.string().optional()
     }).parse(req.body);
 
-    const isImage = req.file.mimetype.startsWith('image/');
-    const mediaDir = path.join(process.cwd(), 'storage', 'public', 'media', body.folder);
-    await mkdir(mediaDir, { recursive: true });
-
-    let buffer = req.file.buffer;
+    let buffer: Buffer = req.file.buffer;
     let width: number | undefined;
     let height: number | undefined;
-    let ext = path.extname(req.file.originalname).toLowerCase().replace('.', '') || 'bin';
+    const image = sharp(req.file.buffer).rotate();
+    const metadata = await image.metadata();
+    width = metadata.width;
+    height = metadata.height;
+    buffer = await image
+      .resize({ width: 1080, height: 1920, fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 82 })
+      .toBuffer();
 
-    if (isImage) {
-      const image = sharp(req.file.buffer).rotate();
-      const metadata = await image.metadata();
-      width = metadata.width;
-      height = metadata.height;
-      buffer = await image.webp({ quality: 82 }).toBuffer();
-      ext = 'webp';
-    }
-
-    const filename = `${nanoid(12)}.${ext}`;
-    await writeFile(path.join(mediaDir, filename), buffer);
+    const filename = `${nanoid(12)}.webp`;
 
     const asset = await MediaAsset.create({
       folder: body.folder,
       originalName: req.file.originalname,
       filename,
-      url: `/media/${body.folder}/${filename}`,
-      mimeType: isImage ? 'image/webp' : req.file.mimetype,
+      url: '/pending',
+      mimeType: 'image/webp',
       size: buffer.byteLength,
       width,
       height,
@@ -159,8 +150,12 @@ cmsRouter.post('/media', upload.single('file'), async (req, res, next) => {
       caption: body.caption,
       description: body.description,
       tags: body.tags ? body.tags.split(',').map((tag) => tag.trim()).filter(Boolean) : [],
-      optimized: isImage
+      data: buffer,
+      optimized: true
     });
+
+    asset.url = `/api/public/media/${asset._id}`;
+    await asset.save();
 
     res.status(201).json(asset);
   } catch (error) { next(error); }

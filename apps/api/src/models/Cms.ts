@@ -55,6 +55,7 @@ const mediaSchema = new Schema({
   caption: String,
   description: String,
   tags: [String],
+  data: { type: Buffer, select: false },
   optimized: { type: Boolean, default: false }
 }, { timestamps: true });
 
