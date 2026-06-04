@@ -14,7 +14,7 @@ import {
   Upload,
   Video
 } from 'lucide-react';
-import { API_URL } from '@/lib/api';
+import { adminFetch } from '@/lib/adminApi';
 import { AdminNav } from '@/components/AdminNav';
 
 type MediaAsset = { _id: string; url: string; alt?: string };
@@ -115,25 +115,33 @@ function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
 }
 
-async function imageFileToDataUrl(file: File, maxSize = 420) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxSize / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('Image compression failed');
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  let quality = 0.62;
-  let dataUrl = canvas.toDataURL('image/webp', quality);
-  while (dataUrl.length > 450_000 && quality > 0.24) {
-    quality -= 0.08;
-    dataUrl = canvas.toDataURL('image/webp', quality);
+async function uploadToCloudinary(file: File, folder: string) {
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  if (!cloudName || !uploadPreset) {
+    throw new Error('Cloudinary env missing hai. Abhi JPG/PNG direct URL paste karke Save URL/Text karo.');
   }
-  if (dataUrl.length > 650_000) {
-    throw new Error('Compressed image abhi bhi badi hai. JPG/PNG direct URL paste karo.');
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    throw new Error('Sirf JPG, PNG ya WebP allowed hai.');
   }
-  return dataUrl;
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Image 5MB se chhoti rakho.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', uploadPreset);
+  formData.append('folder', `cineforge/${folder}`);
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.secure_url) {
+    throw new Error(data?.error?.message || 'Cloudinary upload failed.');
+  }
+  return String(data.secure_url);
 }
 
 export default function AdminContentPage() {
@@ -158,7 +166,7 @@ export default function AdminContentPage() {
   })), []);
 
   async function load() {
-    const response = await fetch(`${API_URL}/api/cms/cards`, { credentials: 'include' });
+    const response = await adminFetch('/api/cms/cards');
     if (!response.ok) {
       setMessage('Session expired lag rahi hai. Please admin login dobara karo.');
       return;
@@ -189,27 +197,6 @@ export default function AdminContentPage() {
       ...current,
       [slotId]: { ...(current[slotId] || { title: '', description: '', url: '', badgeText: '', borderColor: '#ff0000' }), ...patch }
     }));
-  }
-
-  async function createMediaLink(slot: Slot, url: string, title: string) {
-    const response = await fetch(`${API_URL}/api/cms/media/link`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        folder: slot.sectionKey,
-        url,
-        title,
-        alt: title,
-        width: slot.width,
-        height: slot.height
-      })
-    });
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      throw new Error(`Media URL save failed (${response.status}) ${detail.slice(0, 160)}`);
-    }
-    return (await response.json()) as MediaAsset;
   }
 
   async function saveSlot(slot: Slot, uploadedMedia?: MediaAsset, overrideUrl?: string) {
@@ -249,9 +236,8 @@ export default function AdminContentPage() {
         active: true
       };
 
-      const response = await fetch(`${API_URL}/api/cms/cards${card ? `/${card._id}` : ''}`, {
+      const response = await adminFetch(`/api/cms/cards${card ? `/${card._id}` : ''}`, {
         method: card ? 'PATCH' : 'POST',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -291,9 +277,9 @@ export default function AdminContentPage() {
     setMessage(`${slot.label} image upload ho rahi hai...`);
 
     try {
-      const dataUrl = await imageFileToDataUrl(file);
-      updateDraft(slot.id, { url: dataUrl });
-      await saveSlot(slot, undefined, dataUrl);
+      const secureUrl = await uploadToCloudinary(file, slot.sectionKey);
+      updateDraft(slot.id, { url: secureUrl });
+      await saveSlot(slot, undefined, secureUrl);
     } catch (error) {
       const detail = error instanceof Error ? error.message : 'Unknown error';
       setMessage(`Image upload failed: ${detail}. Dusri image try karo ya screenshot bhejo.`);
@@ -306,9 +292,8 @@ export default function AdminContentPage() {
   async function toggle(slot: Slot) {
     const card = cardsBySlot.get(slot.id);
     if (!card) return;
-    await fetch(`${API_URL}/api/cms/cards/${card._id}`, {
+    await adminFetch(`/api/cms/cards/${card._id}`, {
       method: 'PATCH',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ active: !card.active })
     });

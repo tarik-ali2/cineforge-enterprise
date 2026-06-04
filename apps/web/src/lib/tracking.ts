@@ -19,6 +19,10 @@ type TrackingSettings = {
   googleAdsConversionId: string;
   googleAdsConversionLabel: string;
   microsoftClarityId: string;
+  customHeadCode: string;
+  customBodyCode: string;
+  purchaseValue: string;
+  currency: string;
 };
 
 let settingsPromise: Promise<TrackingSettings> | null = null;
@@ -55,7 +59,11 @@ async function getTrackingSettings(): Promise<TrackingSettings> {
         ga4MeasurementId: clean(settings.ga4_measurement_id) || clean(settings.ga4_id),
         googleAdsConversionId: clean(settings.google_ads_conversion_id),
         googleAdsConversionLabel: clean(settings.google_ads_conversion_label),
-        microsoftClarityId: clean(settings.microsoft_clarity_id)
+        microsoftClarityId: clean(settings.microsoft_clarity_id),
+        customHeadCode: clean(settings.custom_head_code),
+        customBodyCode: clean(settings.custom_body_code),
+        purchaseValue: clean(settings.purchase_value) || '199',
+        currency: clean(settings.currency) || 'INR'
       };
     })
     .catch(() => ({
@@ -65,7 +73,11 @@ async function getTrackingSettings(): Promise<TrackingSettings> {
       ga4MeasurementId: '',
       googleAdsConversionId: '',
       googleAdsConversionLabel: '',
-      microsoftClarityId: ''
+      microsoftClarityId: '',
+      customHeadCode: '',
+      customBodyCode: '',
+      purchaseValue: '199',
+      currency: 'INR'
     }));
   return settingsPromise;
 }
@@ -102,12 +114,32 @@ function injectScript(id: string, src: string, attrs: Record<string, string> = {
   document.head.appendChild(script);
 }
 
+function injectInlineCode(id: string, code: string, placement: 'head' | 'body') {
+  if (typeof window === 'undefined' || !code || document.getElementById(id)) return;
+  const container = document.createElement('div');
+  container.innerHTML = code;
+  Array.from(container.childNodes).forEach((node, index) => {
+    if (node.nodeName.toLowerCase() === 'script') {
+      const original = node as HTMLScriptElement;
+      const script = document.createElement('script');
+      script.id = `${id}-${index}`;
+      Array.from(original.attributes).forEach((attr) => script.setAttribute(attr.name, attr.value));
+      script.text = original.text;
+      (placement === 'head' ? document.head : document.body).appendChild(script);
+      return;
+    }
+    (placement === 'head' ? document.head : document.body).appendChild(node);
+  });
+}
+
 export async function initMarketing() {
   if (typeof window === 'undefined') return;
   window.dataLayer = window.dataLayer || [];
   getStoredUtm();
 
   const settings = await getTrackingSettings();
+
+  injectInlineCode('cf-custom-head', settings.customHeadCode, 'head');
 
   if (settings.gtmId) {
     window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
@@ -142,6 +174,8 @@ export async function initMarketing() {
     script.innerHTML = `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${settings.microsoftClarityId.replace(/[^a-zA-Z0-9_-]/g, '')}");`;
     document.head.appendChild(script);
   }
+
+  injectInlineCode('cf-custom-body', settings.customBodyCode, 'body');
 }
 
 export function getSessionId() {

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, CreditCard, ExternalLink, Megaphone, RefreshCcw, Save, ShieldCheck } from 'lucide-react';
-import { API_URL } from '@/lib/api';
+import { adminFetch } from '@/lib/adminApi';
 import { DEFAULT_META_PIXEL_ID, TRACKING_DEBUG_KEY } from '@/lib/tracking';
 import { AdminNav } from '@/components/AdminNav';
 
@@ -34,6 +34,11 @@ const fields: Field[] = [
   { section: 'tracking', group: 'tracking', key: 'google_ads_conversion_id', label: 'Google Ads Conversion ID', defaultValue: '', help: 'Google ads remarketing/conversion ID.', },
   { section: 'tracking', group: 'tracking', key: 'google_ads_conversion_label', label: 'Google Ads Label', defaultValue: '', help: 'Google Ads conversion label.', },
   { section: 'tracking', group: 'tracking', key: 'microsoft_clarity_id', label: 'Microsoft Clarity ID', defaultValue: '', help: 'Optional Clarity tracking ID.', },
+  { section: 'tracking', group: 'tracking', key: 'custom_head_code', label: 'Custom Head Code', defaultValue: '', help: 'Head section me custom script/snippet inject hoga.', },
+  { section: 'tracking', group: 'tracking', key: 'custom_body_code', label: 'Custom Body Code', defaultValue: '', help: 'Body end par custom script/snippet inject hoga.', },
+  { section: 'tracking', group: 'tracking', key: 'purchase_value', label: 'Purchase Value', defaultValue: '199', help: 'Thank-you Purchase event value.', },
+  { section: 'tracking', group: 'tracking', key: 'currency', label: 'Currency', defaultValue: 'INR', help: 'Tracking currency, default INR.', },
+  { section: 'tracking', group: 'tracking', key: 'thank_you_url', label: 'Thank You URL', defaultValue: '/thank-you?paid=1', help: 'Successful payment return URL.', },
   { section: 'thank_you', group: 'thank_you', key: 'download_content', label: 'Thank You Download Text', defaultValue: 'Your verified download link will appear here.', help: 'Paid customer ko thank-you page par dikhne wala text.', }
 ];
 
@@ -53,7 +58,7 @@ export default function AdminSettingsPage() {
 
   async function load() {
     setMessage('');
-    const response = await fetch(`${API_URL}/api/admin/settings`, { credentials: 'include' });
+    const response = await adminFetch('/api/admin/settings');
     if (response.status === 401 || response.status === 403) {
       setMessage('Session expired. Please admin login dobara karo.');
       return;
@@ -91,9 +96,8 @@ export default function AdminSettingsPage() {
     setLoading(true);
     setMessage(`${field.label} save ho raha hai...`);
     try {
-      const response = await fetch(`${API_URL}/api/admin/settings`, {
+      const response = await adminFetch('/api/admin/settings', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           settings: [{
@@ -119,9 +123,8 @@ export default function AdminSettingsPage() {
     setLoading(true);
     setMessage('Saving...');
     try {
-      const response = await fetch(`${API_URL}/api/admin/settings`, {
+      const response = await adminFetch('/api/admin/settings', {
         method: 'PUT',
-        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           settings: list.map((field) => ({

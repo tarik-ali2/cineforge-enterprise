@@ -42,8 +42,8 @@ authRouter.post('/login', async (req, res, next) => {
       ipHash: publicIpHash(req.ip),
       userAgent: req.headers['user-agent']
     });
-    res.cookie('access_token', tokens.accessToken, { httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 15 * 60 * 1000 });
-    res.cookie('refresh_token', tokens.refreshToken, { httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 30 * 24 * 60 * 60 * 1000 });
+    res.cookie('access_token', tokens.accessToken, { httpOnly: true, sameSite: 'lax', secure: isProduction || req.secure, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('refresh_token', tokens.refreshToken, { httpOnly: true, sameSite: 'lax', secure: isProduction || req.secure, maxAge: 30 * 24 * 60 * 60 * 1000 });
     res.json({ ok: true, accessToken: tokens.accessToken });
   } catch (error) {
     next(error);
@@ -59,10 +59,10 @@ authRouter.post('/logout', (_req, res) => {
 authRouter.post('/refresh', async (req, res, next) => {
   try {
     const token = req.cookies?.refresh_token ?? req.body?.refreshToken;
-    if (!token) return res.status(401).json({ error: 'Refresh token required' });
+    if (!token) return res.status(401).json({ error: 'missing_refresh_token' });
     const decoded = verifyRefreshToken(token);
     const session = await Session.findOne({ deviceId: decoded.sessionId, refreshTokenHash: sha256(token), revokedAt: null });
-    if (!session) return res.status(401).json({ error: 'Session expired' });
+    if (!session) return res.status(401).json({ error: 'refresh_session_expired' });
 
     const payload = await buildAuthPayload(decoded.sub);
     const sessionId = nanoid(32);
@@ -79,8 +79,8 @@ authRouter.post('/refresh', async (req, res, next) => {
     });
 
     const accessToken = signAccessToken(payload);
-    res.cookie('access_token', accessToken, { httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 15 * 60 * 1000 });
-    res.cookie('refresh_token', refreshToken, { httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 30 * 24 * 60 * 60 * 1000 });
+    res.cookie('access_token', accessToken, { httpOnly: true, sameSite: 'lax', secure: isProduction || req.secure, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('refresh_token', refreshToken, { httpOnly: true, sameSite: 'lax', secure: isProduction || req.secure, maxAge: 30 * 24 * 60 * 60 * 1000 });
     res.json({ ok: true, accessToken });
   } catch (error) { next(error); }
 });

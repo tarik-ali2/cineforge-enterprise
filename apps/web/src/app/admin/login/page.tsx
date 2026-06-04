@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { API_URL } from '@/lib/api';
+import { setAdminAccessToken } from '@/lib/adminApi';
 import { AdminNav } from '@/components/AdminNav';
 
 export default function AdminLoginPage() {
@@ -17,8 +18,12 @@ export default function AdminLoginPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     });
-    setMessage(response.ok ? 'Login success. Open dashboard.' : 'Login failed. Check API and credentials.');
-    if (response.ok) window.location.href = '/admin/dashboard';
+    const data = await response.json().catch(() => ({}));
+    setMessage(response.ok ? 'Login success. Open dashboard.' : data?.error || 'Login failed. Check API and credentials.');
+    if (response.ok) {
+      if (data?.accessToken) setAdminAccessToken(String(data.accessToken));
+      window.location.href = '/admin/dashboard';
+    }
   }
 
   return (

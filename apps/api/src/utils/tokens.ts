@@ -4,7 +4,7 @@ import { env } from '../config/env.js';
 export type JwtUser = { sub: string; roles: string[]; permissions: string[] };
 
 export function signAccessToken(payload: JwtUser) {
-  return jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
+  return jwt.sign(payload, env.JWT_ACCESS_SECRET, { expiresIn: '24h' });
 }
 
 export function signRefreshToken(payload: { sub: string; sessionId: string }) {
@@ -18,4 +18,3 @@ export function verifyAccessToken(token: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(token, env.JWT_REFRESH_SECRET) as { sub: string; sessionId: string };
 }
-
