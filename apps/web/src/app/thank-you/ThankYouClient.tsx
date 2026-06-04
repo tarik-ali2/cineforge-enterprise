@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { API_URL } from '@/lib/api';
-import { initMarketing, track } from '@/lib/tracking';
+import { initMarketing, trackPurchaseOnce } from '@/lib/tracking';
 
 export function ThankYouClient() {
   const searchParams = useSearchParams();
@@ -13,8 +13,20 @@ export function ThankYouClient() {
   const [status, setStatus] = useState<'checking' | 'verified' | 'pending' | 'missing'>('checking');
 
   useEffect(() => {
+    async function fireFallbackPurchase() {
+      await initMarketing();
+      trackPurchaseOnce({
+        value: 199,
+        currency: 'INR',
+        eventId: eventId || undefined,
+        orderCode: orderCode || undefined,
+        productName: 'CineForge AI Prompt Bundle'
+      });
+    }
+
     async function verify() {
       if (!paid || !orderCode) {
+        await fireFallbackPurchase();
         setStatus('missing');
         return;
       }
@@ -26,8 +38,8 @@ export function ThankYouClient() {
       const order = await response.json();
       if (order.verified) {
         await initMarketing();
-        track('purchase', {
-          value: order.amount,
+        trackPurchaseOnce({
+          value: 199,
           currency: order.currency ?? 'INR',
           eventId: order.eventId ?? eventId,
           orderCode,

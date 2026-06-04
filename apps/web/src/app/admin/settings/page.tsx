@@ -25,7 +25,7 @@ const fields: Field[] = [
   { section: 'payment', group: 'payment', key: 'checkout_url_348', label: 'Rs.348 Payment Link', defaultValue: '', help: 'Main bundle + Bump 1 selected ho to ye link open hoga.', },
   { section: 'payment', group: 'payment', key: 'checkout_url_495', label: 'Rs.495 Payment Link', defaultValue: '', help: 'Main bundle + dono bumps selected ho to ye link open hoga.', },
   { section: 'payment', group: 'payment', key: 'external_checkout_url', label: 'Fallback Payment Link', defaultValue: '', help: 'Agar amount ka exact link empty ho to fallback link use hoga.', },
-  { section: 'payment', group: 'payment', key: 'success_redirect_url', label: 'Success Redirect URL', defaultValue: '/thank-you?paid=1', help: 'Payment success ke baad customer yahan return hona chahiye.', },
+  { section: 'payment', group: 'payment', key: 'success_redirect_url', label: 'Success Redirect URL', defaultValue: '/thank-you', help: 'Payment success ke baad customer yahan return hona chahiye.', },
   { section: 'tracking', group: 'tracking', key: 'gtm_id', label: 'GTM Container ID', defaultValue: '', help: 'Example: GTM-XXXXXXX.', },
   { section: 'tracking', group: 'tracking', key: 'meta_pixel_id', label: 'Meta Pixel ID', defaultValue: DEFAULT_META_PIXEL_ID, help: 'Primary Meta Pixel ID.', },
   { section: 'tracking', group: 'tracking', key: 'additional_meta_pixel_ids', label: 'Extra Meta Pixel IDs', defaultValue: '', help: 'Optional comma separated pixel IDs.', },
@@ -38,7 +38,7 @@ const fields: Field[] = [
   { section: 'tracking', group: 'tracking', key: 'custom_body_code', label: 'Custom Body Code', defaultValue: '', help: 'Body end par custom script/snippet inject hoga.', },
   { section: 'tracking', group: 'tracking', key: 'purchase_value', label: 'Purchase Value', defaultValue: '199', help: 'Thank-you Purchase event value.', },
   { section: 'tracking', group: 'tracking', key: 'currency', label: 'Currency', defaultValue: 'INR', help: 'Tracking currency, default INR.', },
-  { section: 'tracking', group: 'tracking', key: 'thank_you_url', label: 'Thank You URL', defaultValue: '/thank-you?paid=1', help: 'Successful payment return URL.', },
+  { section: 'tracking', group: 'tracking', key: 'thank_you_url', label: 'Thank You URL', defaultValue: '/thank-you', help: 'Successful payment return URL.', },
   { section: 'thank_you', group: 'thank_you', key: 'download_content', label: 'Thank You Download Text', defaultValue: 'Your verified download link will appear here.', help: 'Paid customer ko thank-you page par dikhne wala text.', }
 ];
 
@@ -273,14 +273,14 @@ export default function AdminSettingsPage() {
               <a href="/checkout" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 font-black text-white">
                 <ExternalLink size={17} /> Test Checkout
               </a>
-              <a href="/thank-you?paid=1" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white">
+              <a href="/thank-you" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-4 py-3 font-black text-white">
                 <ExternalLink size={17} /> Test Thank You Page
               </a>
             </div>
             <div className="mt-5 space-y-3 text-sm font-semibold leading-6 text-slate-600">
               <p>Meta Pixel ID: <strong>{values.meta_pixel_id || DEFAULT_META_PIXEL_ID}</strong></p>
-              <p>Purchase event sirf `/thank-you?paid=1` par fire hota hai.</p>
-              <p>Payment link me provider success redirect support karta ho to `/thank-you?paid=1` set karo.</p>
+              <p>Purchase event sirf `/thank-you` page par fire hota hai.</p>
+              <p>Payment link me provider success redirect support karta ho to `/thank-you` set karo.</p>
             </div>
           </section>
         </div>

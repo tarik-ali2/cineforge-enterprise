@@ -33,7 +33,7 @@ export default function CheckoutPage() {
     setLoading(true);
     setMessage('');
     track('initiate_checkout', {
-      value: total,
+      value: 199,
       currency: 'INR',
       productName: 'CineForge AI Prompt Bundle',
       contentIds: items.map((item) => item.id),

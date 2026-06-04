@@ -28,8 +28,13 @@ async function getCheckoutSettings(amount: number) {
   return {
     provider: map.provider || env.PAYMENT_PROVIDER,
     checkoutUrl: amountLink || map.external_checkout_url || env.EXTERNAL_CHECKOUT_URL,
-    successRedirectUrl: map.success_redirect_url || env.PAYMENT_SUCCESS_REDIRECT_URL || `${env.WEB_URL}/thank-you?paid=1`
+    successRedirectUrl: map.success_redirect_url || env.PAYMENT_SUCCESS_REDIRECT_URL || `${env.WEB_URL}/thank-you`
   };
+}
+
+function appendQuery(url: string, params: Record<string, string>) {
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}${new URLSearchParams(params).toString()}`;
 }
 
 commerceRouter.get('/offers', async (_req, res) => {
@@ -55,8 +60,9 @@ async function createOrder(req: any, res: any, next: any) {
     const successRedirectUrl = paymentSettings.successRedirectUrl.startsWith('http')
       ? paymentSettings.successRedirectUrl
       : `${env.WEB_URL}${paymentSettings.successRedirectUrl.startsWith('/') ? '' : '/'}${paymentSettings.successRedirectUrl}`;
+    const successUrlWithParams = appendQuery(successRedirectUrl, { order: orderCode, event_id: eventId });
     const checkoutUrl = paymentSettings.checkoutUrl
-      ? `${paymentSettings.checkoutUrl}${paymentSettings.checkoutUrl.includes('?') ? '&' : '?'}order_id=${encodeURIComponent(orderCode)}&amount=${body.amount}&success_url=${encodeURIComponent(`${successRedirectUrl}&order=${orderCode}&event_id=${eventId}`)}`
+      ? appendQuery(paymentSettings.checkoutUrl, { order_id: orderCode, amount: String(body.amount), success_url: successUrlWithParams })
       : '';
 
     const order = await Order.create({
@@ -80,7 +86,7 @@ async function createOrder(req: any, res: any, next: any) {
       payment: {
         provider: paymentSettings.provider,
         checkoutUrl,
-        successRedirectUrl: `${successRedirectUrl}&order=${orderCode}&event_id=${eventId}`,
+        successRedirectUrl: successUrlWithParams,
         webhookUrl: `${env.API_URL}/api/verify-payment`
       }
     });

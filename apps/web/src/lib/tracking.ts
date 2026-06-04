@@ -1,7 +1,8 @@
 type TrackingPayload = Record<string, unknown>;
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : '');
-const DEFAULT_META_PIXEL_ID = '1697719404699807';
+const DEFAULT_META_PIXEL_ID = '917919111302089';
 const TRACKING_DEBUG_KEY = 'cf_tracking_debug';
+const PURCHASE_FIRED_KEY = 'cf_purchase_fired';
 
 const metaEventMap: Record<string, string> = {
   page_view: 'PageView',
@@ -146,7 +147,7 @@ export async function initMarketing() {
     injectScript(`cf-gtm-${settings.gtmId}`, `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(settings.gtmId)}`, { 'data-gtm': settings.gtmId });
   }
 
-  if (settings.metaPixelId && !window.fbq) {
+  if (settings.metaPixelId && typeof window.fbq !== 'function') {
     const fbq = function (...args: unknown[]) {
       window.fbq?.callMethod ? window.fbq.callMethod(...args) : window.fbq?.queue?.push(args);
     } as NonNullable<Window['fbq']>;
@@ -158,7 +159,7 @@ export async function initMarketing() {
     [settings.metaPixelId, ...settings.additionalMetaPixelIds].forEach((pixelId) => {
       window.fbq?.('init', pixelId);
     });
-    window.fbq('track', 'PageView');
+    if (typeof window.fbq === 'function') window.fbq('track', 'PageView');
     window.__cfPageViewSent = true;
     recordEventStatus('PageView');
   }
@@ -199,7 +200,7 @@ export function track(event: string, payload: TrackingPayload = {}) {
   });
 
   const metaEvent = metaEventMap[event];
-  if (metaEvent && window.fbq) {
+  if (metaEvent && typeof window.fbq === 'function') {
     const eventId = typeof payload.eventId === 'string' ? payload.eventId : undefined;
     const metaPayload = {
       value: payload.value,
@@ -218,7 +219,7 @@ export function track(event: string, payload: TrackingPayload = {}) {
     }
   }
 
-  if (metaEvent && !window.fbq) recordEventStatus(metaEvent, 'skipped');
+  if (metaEvent && typeof window.fbq !== 'function') recordEventStatus(metaEvent, 'skipped');
 
   fetch(`${API_URL}/api/marketing/track`, {
     method: 'POST',
@@ -246,6 +247,25 @@ declare global {
     };
     __cfPageViewSent?: boolean;
   }
+}
+
+export function trackPurchaseOnce(payload: TrackingPayload = {}) {
+  if (typeof window === 'undefined') return false;
+  const orderCode = typeof payload.orderCode === 'string' && payload.orderCode ? payload.orderCode : 'thank_you';
+  const storage = orderCode === 'thank_you' ? sessionStorage : localStorage;
+  const key = `${PURCHASE_FIRED_KEY}_${orderCode}`;
+  if (storage.getItem(key)) {
+    recordEventStatus('Purchase', 'skipped');
+    return false;
+  }
+  storage.setItem(key, new Date().toISOString());
+  track('purchase', {
+    value: 199,
+    currency: 'INR',
+    productName: 'CineForge AI Prompt Bundle',
+    ...payload
+  });
+  return true;
 }
 
 export { DEFAULT_META_PIXEL_ID, TRACKING_DEBUG_KEY };
