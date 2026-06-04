@@ -89,6 +89,8 @@ const marketPromptCards = [
   }
 ];
 
+const FALLBACK_IMAGE = '/cineforge-ai-bundle.png';
+
 type PublicCard = {
   _id: string;
   sectionKey: string;
@@ -103,6 +105,34 @@ type PublicCard = {
 
 function isVideoUrl(url: string) {
   return /youtube\.com|youtu\.be|wistia\.com|vimeo\.com|\.mp4/i.test(url);
+}
+
+function normalizeImageUrl(url?: string) {
+  const cleanUrl = (url || '').trim();
+  if (!cleanUrl || cleanUrl === 'null' || cleanUrl === 'undefined' || cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
+    return FALLBACK_IMAGE;
+  }
+  return cleanUrl;
+}
+
+function CmsImage({ src, alt, className }: { src?: string; alt: string; className?: string }) {
+  const [currentSrc, setCurrentSrc] = useState(normalizeImageUrl(src));
+
+  useEffect(() => {
+    const nextSrc = normalizeImageUrl(src);
+    if (process.env.NODE_ENV === 'development') console.log('[cms-image]', alt, nextSrc);
+    setCurrentSrc(nextSrc);
+  }, [alt, src]);
+
+  return (
+    <img
+      src={currentSrc}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setCurrentSrc(FALLBACK_IMAGE)}
+    />
+  );
 }
 
 const toolStyles = [
@@ -166,7 +196,7 @@ export function LandingPage() {
 
   const dynamicImageCards = useMemo(() => {
     const cards = cmsCards.filter((card) => card.sectionKey === 'image_cards' && (card.mediaId?.url || card.videoUrl));
-    return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: card.mediaId?.url || card.videoUrl || '/cineforge-ai-bundle.png', alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
+    return cards.length ? cards.map((card) => ({ title: card.title || 'Image Card', url: normalizeImageUrl(card.mediaId?.url || card.videoUrl), alt: card.mediaId?.alt || card.title || 'CineForge image card' })) : [];
   }, [cmsCards]);
 
   const dynamicMarketCards = useMemo(() => {
@@ -174,7 +204,7 @@ export function LandingPage() {
     return cards.length ? cards.map((card) => ({
       title: card.title || 'Prompt Card',
       description: card.description || 'Ready-to-copy prompt category for creators and businesses.',
-      imageUrl: card.mediaId?.url || (!isVideoUrl(card.videoUrl || '') ? card.videoUrl : '') || '/cineforge-ai-bundle.png',
+      imageUrl: normalizeImageUrl(card.mediaId?.url || (!isVideoUrl(card.videoUrl || '') ? card.videoUrl : '') || FALLBACK_IMAGE),
       videoUrl: isVideoUrl(card.videoUrl || '') ? card.videoUrl || '' : '',
       badgeText: card.badgeText || 'Most Popular',
       borderColor: card.borderColor || '#ff0000'
@@ -306,7 +336,7 @@ export function LandingPage() {
                 </h3>
                 <div className="relative overflow-hidden rounded-[1rem] border-[5px] bg-slate-100 sm:border-[6px] md:rounded-[1.1rem]" style={{ borderColor: card.borderColor }}>
                   <div className="relative aspect-[9/16]">
-                    <Image src={card.imageUrl} alt={card.title} fill className="object-cover" />
+                    <CmsImage src={card.imageUrl} alt={card.title} className="h-full w-full object-cover" />
                     {card.videoUrl ? (
                       <div className="absolute inset-0 grid place-items-center bg-black/16">
                         <span className="grid h-24 w-24 place-items-center rounded-xl bg-[#2456ff]/85 text-white shadow-[0_18px_48px_rgba(37,99,235,.35)]">
@@ -360,7 +390,7 @@ export function LandingPage() {
           {(dynamicImageCards.length ? dynamicImageCards : imageCards.map((title, index) => ({ title, url: index % 2 === 0 ? '/cineforge-ai-bundle.png' : '/digital-products.png', alt: title }))).map((card) => (
             <article key={card.title} className="min-w-[82vw] snap-start overflow-hidden rounded-2xl border border-white/14 bg-black shadow-[0_18px_55px_rgba(0,0,0,.28)] sm:min-w-[300px] md:min-w-[315px]">
               <div className="relative aspect-[9/16]">
-                <Image src={card.url} alt={card.alt} fill className="object-contain" />
+                <CmsImage src={card.url} alt={card.alt} className="h-full w-full object-contain" />
               </div>
             </article>
           ))}

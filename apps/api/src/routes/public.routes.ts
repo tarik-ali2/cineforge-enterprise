@@ -14,6 +14,17 @@ function connectWithTimeout(ms = 6000) {
   ]);
 }
 
+function toMediaBuffer(data: unknown) {
+  if (Buffer.isBuffer(data)) return data;
+  if (data instanceof Uint8Array) return Buffer.from(data);
+  if (data && typeof data === 'object') {
+    const value = data as { buffer?: Uint8Array | ArrayBuffer; data?: number[] };
+    if (value.buffer) return value.buffer instanceof Uint8Array ? Buffer.from(value.buffer) : Buffer.from(new Uint8Array(value.buffer));
+    if (Array.isArray(value.data)) return Buffer.from(value.data);
+  }
+  return Buffer.from(data as ArrayBuffer);
+}
+
 publicRouter.get('/landing', async (_req, res) => {
   try {
     await connectWithTimeout();
@@ -34,9 +45,11 @@ publicRouter.get('/media/:id', async (req, res) => {
     await connectWithTimeout();
     const asset = await MediaAsset.findById(req.params.id).select('+data').lean();
     if (!asset?.data) return res.status(404).send('Media not found');
+    const imageData = toMediaBuffer(asset.data);
     res.setHeader('Content-Type', asset.mimeType || 'image/webp');
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    res.send(asset.data);
+    res.setHeader('Content-Length', imageData.byteLength.toString());
+    res.send(imageData);
   } catch {
     res.status(404).send('Media not found');
   }
