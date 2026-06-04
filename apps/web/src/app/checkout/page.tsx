@@ -1,30 +1,70 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ShieldCheck } from 'lucide-react';
 import { API_URL } from '@/lib/api';
 import { getStoredUtm, track } from '@/lib/tracking';
 
 const defaultOffers = [
-  { id: 'bundle', name: '10 Hajar+ AI Prompt Bundle + AI Course', price: 199, detail: 'Gemini image and video prompt categories plus recorded AI course with lifetime access.' },
+  { id: 'bundle', name: '10 Hajar+ AI Prompt Bundle + AI Course', price: 199, detail: 'Gemini image and video prompt categories plus recorded AI course with lifetime access.', required: true },
   { id: 'chatgpt', name: '100,000 ChatGPT Prompts Bundle', price: 149, detail: 'Smart work prompt library for creators and hustlers.' },
   { id: 'course', name: 'AI and Machine Learning Course', price: 147, detail: 'Beginner-friendly recorded course with practical learning path.' }
 ];
 
 export default function CheckoutPage() {
+  const [offers, setOffers] = useState(defaultOffers);
   const [selected, setSelected] = useState(() => new Set(defaultOffers.map((offer) => offer.id)));
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const total = useMemo(() => defaultOffers.filter((offer) => selected.has(offer.id)).reduce((sum, offer) => sum + offer.price, 0), [selected]);
+  const total = useMemo(() => offers.filter((offer) => selected.has(offer.id)).reduce((sum, offer) => sum + offer.price, 0), [offers, selected]);
+
+  useEffect(() => {
+    fetch(`${API_URL}/api/public/landing`, { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => {
+        const settings = data?.settings ?? {};
+        const mainPrice = Number(settings.price) || defaultOffers[0].price;
+        const bump1Price = Number(settings.offer_bump_1_price) || defaultOffers[1].price;
+        const bump2Price = Number(settings.offer_bump_2_price) || defaultOffers[2].price;
+        setOffers([
+          { ...defaultOffers[0], name: settings.name || defaultOffers[0].name, price: mainPrice },
+          { ...defaultOffers[1], price: bump1Price },
+          { ...defaultOffers[2], price: bump2Price }
+        ]);
+      })
+      .catch(() => undefined);
+  }, []);
 
   function toggle(id: string) {
     const next = new Set(selected);
-    next.has(id) ? next.delete(id) : next.add(id);
+    next.add('bundle');
+    if (id === 'bundle') {
+      setSelected(next);
+      return;
+    }
+    if (id === 'chatgpt') {
+      if (next.has('chatgpt')) {
+        next.delete('chatgpt');
+        next.delete('course');
+      } else {
+        next.add('chatgpt');
+      }
+      setSelected(next);
+      return;
+    }
+    if (id === 'course') {
+      if (next.has('course')) {
+        next.delete('course');
+      } else {
+        next.add('chatgpt');
+        next.add('course');
+      }
+    }
     setSelected(next);
   }
 
   async function startPayment() {
-    const items = defaultOffers.filter((offer) => selected.has(offer.id));
+    const items = offers.filter((offer) => selected.has(offer.id));
     if (!items.length) {
       setMessage('Select at least one offer.');
       return;
@@ -82,9 +122,9 @@ export default function CheckoutPage() {
         <p className="mt-3 text-slate-600">Select your offer. Name, email and phone will be collected on the payment page.</p>
 
         <div className="mt-6 space-y-4">
-          {defaultOffers.map((offer) => (
+          {offers.map((offer) => (
             <label key={offer.id} className={`grid cursor-pointer grid-cols-[auto_1fr_auto] gap-4 rounded-2xl border-2 p-4 ${selected.has(offer.id) ? 'border-[#1264ff] bg-[#eef6ff]' : 'border-slate-200 bg-white'}`}>
-              <input type="checkbox" checked={selected.has(offer.id)} onChange={() => toggle(offer.id)} className="mt-1 size-5 accent-[#1264ff]" />
+              <input type="checkbox" checked={selected.has(offer.id)} disabled={offer.required} onChange={() => toggle(offer.id)} className="mt-1 size-5 accent-[#1264ff] disabled:cursor-not-allowed" />
               <span>
                 <span className="inline-flex bg-yellow-300 px-3 py-1 text-lg font-black">Yes! I Want this!</span>
                 <span className="mt-3 block font-black text-slate-950">LAST CHANCE ALERT:- <span className="text-red-600">{offer.name} For Rs.{offer.price}/- only</span></span>
@@ -104,7 +144,7 @@ export default function CheckoutPage() {
             {loading ? 'Creating secure order...' : 'Pay Now'} <CheckCircle2 size={18} />
           </button>
           {message ? <p className="mt-3 text-sm font-bold text-neon">{message}</p> : null}
-          <p className="mt-3 flex items-center gap-2 text-xs text-white/60"><ShieldCheck size={15} /> Success redirect: /thank-you?paid=1. Purchase fires only after payment verification.</p>
+          <p className="mt-3 flex items-center gap-2 text-xs text-white/60"><ShieldCheck size={15} /> Success redirect: /thank-you. Purchase fires on the success page.</p>
         </div>
       </section>
     </main>
