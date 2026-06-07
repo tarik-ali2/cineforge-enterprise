@@ -66,7 +66,12 @@ async function createOrder(req: any, res: any, next: any) {
     const successRedirectUrl = paymentSettings.successRedirectUrl.startsWith('http')
       ? paymentSettings.successRedirectUrl
       : `${env.WEB_URL}${paymentSettings.successRedirectUrl.startsWith('/') ? '' : '/'}${paymentSettings.successRedirectUrl}`;
-    const successUrlWithParams = appendQuery(successRedirectUrl, { order: orderCode, event_id: eventId });
+    const successUrlWithParams = appendQuery(successRedirectUrl, {
+      order: orderCode,
+      event_id: eventId,
+      amount: String(body.amount),
+      product: 'cineforge-bundle'
+    });
     const checkoutUrl = paymentSettings.checkoutUrl
       ? appendQuery(paymentSettings.checkoutUrl, { order_id: orderCode, amount: String(body.amount), success_url: successUrlWithParams })
       : '';
