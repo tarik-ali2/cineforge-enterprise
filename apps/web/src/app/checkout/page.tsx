@@ -16,7 +16,10 @@ export default function CheckoutPage() {
   const [selected, setSelected] = useState(() => new Set(defaultOffers.map((offer) => offer.id)));
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [checkoutLinks, setCheckoutLinks] = useState<Record<string, string>>({});
   const total = useMemo(() => offers.filter((offer) => selected.has(offer.id)).reduce((sum, offer) => sum + offer.price, 0), [offers, selected]);
+  const paymentLinkMissing = settingsLoaded && !checkoutLinks[String(total)];
 
   useEffect(() => {
     fetch(`${API_URL}/api/public/landing`, { cache: 'no-store' })
@@ -26,13 +29,20 @@ export default function CheckoutPage() {
         const mainPrice = Number(settings.price) || defaultOffers[0].price;
         const bump1Price = Number(settings.offer_bump_1_price) || defaultOffers[1].price;
         const bump2Price = Number(settings.offer_bump_2_price) || defaultOffers[2].price;
+        setCheckoutLinks({
+          [String(mainPrice)]: String(settings.checkout_url_199 ?? ''),
+          [String(mainPrice + bump1Price)]: String(settings.checkout_url_348 ?? ''),
+          [String(mainPrice + bump2Price)]: String(settings.checkout_url_346 ?? ''),
+          [String(mainPrice + bump1Price + bump2Price)]: String(settings.checkout_url_495 ?? '')
+        });
         setOffers([
           { ...defaultOffers[0], name: settings.name || defaultOffers[0].name, price: mainPrice },
           { ...defaultOffers[1], price: bump1Price },
           { ...defaultOffers[2], price: bump2Price }
         ]);
+        setSettingsLoaded(true);
       })
-      .catch(() => undefined);
+      .catch(() => setSettingsLoaded(true));
   }, []);
 
   function toggle(id: string) {
@@ -45,7 +55,6 @@ export default function CheckoutPage() {
     if (id === 'chatgpt') {
       if (next.has('chatgpt')) {
         next.delete('chatgpt');
-        next.delete('course');
       } else {
         next.add('chatgpt');
       }
@@ -56,7 +65,6 @@ export default function CheckoutPage() {
       if (next.has('course')) {
         next.delete('course');
       } else {
-        next.add('chatgpt');
         next.add('course');
       }
     }
@@ -69,11 +77,15 @@ export default function CheckoutPage() {
       setMessage('Select at least one offer.');
       return;
     }
+    if (paymentLinkMissing) {
+      setMessage(`Rs.${total} ka payment link admin settings me empty hai. Is amount ka link add karo ya combo change karo.`);
+      return;
+    }
 
     setLoading(true);
     setMessage('');
     track('initiate_checkout', {
-      value: 199,
+      value: total,
       currency: 'INR',
       productName: 'CineForge AI Prompt Bundle',
       contentIds: items.map((item) => item.id),
@@ -140,9 +152,10 @@ export default function CheckoutPage() {
             <span className="font-bold text-white/70">Grand Total</span>
             <span className="text-4xl font-black text-neon">Rs.{total}</span>
           </div>
-          <button type="button" onClick={startPayment} disabled={loading} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-neon px-6 py-4 font-black text-ink disabled:opacity-70">
+          <button type="button" onClick={startPayment} disabled={loading || paymentLinkMissing} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-neon px-6 py-4 font-black text-ink disabled:opacity-70">
             {loading ? 'Creating secure order...' : 'Pay Now'} <CheckCircle2 size={18} />
           </button>
+          {paymentLinkMissing ? <p className="mt-3 text-sm font-bold text-red-300">Rs.{total} ka payment link abhi admin me add nahi hai.</p> : null}
           {message ? <p className="mt-3 text-sm font-bold text-neon">{message}</p> : null}
           <p className="mt-3 flex items-center gap-2 text-xs text-white/60"><ShieldCheck size={15} /> Success redirect: /thank-you. Purchase fires on the success page.</p>
         </div>

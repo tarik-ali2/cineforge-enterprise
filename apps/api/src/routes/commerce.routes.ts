@@ -19,6 +19,7 @@ async function getCheckoutSettings(amount: number) {
         'success_redirect_url',
         'checkout_url_199',
         'checkout_url_348',
+        'checkout_url_346',
         'checkout_url_495'
       ]
     }
@@ -27,7 +28,7 @@ async function getCheckoutSettings(amount: number) {
   const amountLink = map[`checkout_url_${amount}`];
   return {
     provider: map.provider || env.PAYMENT_PROVIDER,
-    checkoutUrl: amountLink || map.external_checkout_url || env.EXTERNAL_CHECKOUT_URL,
+    checkoutUrl: amountLink || '',
     successRedirectUrl: map.success_redirect_url || env.PAYMENT_SUCCESS_REDIRECT_URL || `${env.WEB_URL}/thank-you`
   };
 }
@@ -57,6 +58,11 @@ async function createOrder(req: any, res: any, next: any) {
     const orderCode = 'CF-' + nanoid(10).toUpperCase();
     const eventId = `purchase_${orderCode}_${nanoid(8)}`;
     const paymentSettings = await getCheckoutSettings(body.amount);
+    if (!paymentSettings.checkoutUrl) {
+      return res.status(422).json({
+        error: `Payment link for Rs.${body.amount} is not configured in admin settings.`
+      });
+    }
     const successRedirectUrl = paymentSettings.successRedirectUrl.startsWith('http')
       ? paymentSettings.successRedirectUrl
       : `${env.WEB_URL}${paymentSettings.successRedirectUrl.startsWith('/') ? '' : '/'}${paymentSettings.successRedirectUrl}`;

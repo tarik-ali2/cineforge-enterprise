@@ -23,8 +23,9 @@ const fields: Field[] = [
   { section: 'payment', group: 'payment', key: 'provider', label: 'Payment Provider', defaultValue: 'external', help: 'External payment page use karne ke liye external rakho.', },
   { section: 'payment', group: 'payment', key: 'checkout_url_199', label: 'Rs.199 Payment Link', defaultValue: '', help: 'Sirf main bundle selected ho to ye link open hoga.', },
   { section: 'payment', group: 'payment', key: 'checkout_url_348', label: 'Rs.348 Payment Link', defaultValue: '', help: 'Main bundle + Bump 1 selected ho to ye link open hoga.', },
+  { section: 'payment', group: 'payment', key: 'checkout_url_346', label: 'Rs.346 Payment Link', defaultValue: '', help: 'Main bundle + Bump 2 selected ho to ye link open hoga.', },
   { section: 'payment', group: 'payment', key: 'checkout_url_495', label: 'Rs.495 Payment Link', defaultValue: '', help: 'Main bundle + dono bumps selected ho to ye link open hoga.', },
-  { section: 'payment', group: 'payment', key: 'external_checkout_url', label: 'Fallback Payment Link', defaultValue: '', help: 'Agar amount ka exact link empty ho to fallback link use hoga.', },
+  { section: 'payment', group: 'payment', key: 'external_checkout_url', label: 'Fallback Payment Link', defaultValue: '', help: 'Legacy fallback. Launch ke liye har amount ka exact link fill karna better hai.', },
   { section: 'payment', group: 'payment', key: 'success_redirect_url', label: 'Success Redirect URL', defaultValue: '/thank-you', help: 'Payment success ke baad customer yahan return hona chahiye.', },
   { section: 'tracking', group: 'tracking', key: 'gtm_id', label: 'GTM Container ID', defaultValue: '', help: 'Example: GTM-XXXXXXX.', },
   { section: 'tracking', group: 'tracking', key: 'meta_pixel_id', label: 'Meta Pixel ID', defaultValue: DEFAULT_META_PIXEL_ID, help: 'Primary Meta Pixel ID.', },
@@ -180,7 +181,7 @@ export default function AdminSettingsPage() {
           </p>
           <h1 className="mt-2 text-4xl font-black">Payment Links, Bumps and Tracking</h1>
           <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-white/70">
-            Yahan 3 payment page links paste karo. Checkout customer ke selected total ke hisab se correct link open karega.
+            Yahan amount-wise payment page links paste karo. Checkout customer ke selected total ke hisab se exact link open karega.
           </p>
         </header>
 
@@ -195,7 +196,7 @@ export default function AdminSettingsPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-black">Payment Page Links</h2>
-              <p className="mt-1 text-sm font-semibold text-slate-500">Aapke SuperProfile/payment pages ke 3 links yahan paste honge.</p>
+              <p className="mt-1 text-sm font-semibold text-slate-500">Aapke SuperProfile/payment pages ke exact amount links yahan paste honge.</p>
             </div>
             <button onClick={() => saveSection('payment')} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-5 py-3 font-black text-white disabled:opacity-60">
               <Save size={17} /> Save All Payment Settings
@@ -205,6 +206,7 @@ export default function AdminSettingsPage() {
           <div className="mt-5 grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm font-semibold text-slate-700">
             <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} />Rs.199 link: only main bundle.</p>
             <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} />Rs.348 link: main bundle + first bump.</p>
+            <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} />Rs.346 link: main bundle + second bump.</p>
             <p><CheckCircle2 className="mr-2 inline text-emerald-500" size={17} />Rs.495 link: main bundle + both bumps, default checkout total.</p>
           </div>
 
