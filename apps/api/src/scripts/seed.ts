@@ -5,6 +5,7 @@ import { CmsPage, LandingCard } from '../models/Cms.js';
 import { CheckoutOffer } from '../models/Commerce.js';
 import { TrackingScript } from '../models/Marketing.js';
 import { Role } from '../models/Role.js';
+import { Setting } from '../models/System.js';
 import { User } from '../models/User.js';
 import { ensureDefaultRoles } from '../services/auth.service.js';
 
@@ -49,6 +50,30 @@ async function seed() {
     },
     { upsert: true }
   );
+
+  const heroSettings: Array<[string, string]> = [
+    ['hero_badge', 'Everything You Need to Start with AI'],
+    ['hero_headline_line_1', '10K+ Prompts +'],
+    ['hero_headline_line_2', 'AI Agent Course'],
+    ['hero_headline_line_3', '+ Creation Bundle'],
+    ['hero_highlight', 'No Experience Needed'],
+    ['hero_description', 'Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.'],
+    ['hero_tools', 'Gemini, Midjourney, Sora, DALL-E, Leonardo, Google Flow, HeyGen, InVideo, Claude AI, GPT'],
+    ['hero_image_url', '/cineforge-ai-bundle.png'],
+    ['hero_image_alt', 'CineForge AI 10 hajar prompt bundle and AI agent course'],
+    ['hero_price_text', 'Rs.199 Only'],
+    ['hero_image_caption', '10 Hajar+ prompts, AI course and bonuses'],
+    ['hero_primary_cta', 'Get Full Bundle'],
+    ['hero_secondary_cta', 'View Prompt Sets']
+  ];
+
+  for (const [key, value] of heroSettings) {
+    await Setting.updateOne(
+      { key },
+      { $setOnInsert: { group: 'hero', key, value } },
+      { upsert: true }
+    );
+  }
 
   const cards: Array<[string, string, string, number]> = [
     ['hero_tools', 'Gemini', 'Prompt category for image and video generation', 1],

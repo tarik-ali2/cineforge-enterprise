@@ -12,10 +12,23 @@ type Field = {
   label: string;
   defaultValue: string;
   help: string;
-  section: 'payment' | 'tracking' | 'thank_you';
+  section: 'hero' | 'payment' | 'tracking' | 'thank_you';
 };
 
 const fields: Field[] = [
+  { section: 'hero', group: 'hero', key: 'hero_badge', label: 'Hero Badge Text', defaultValue: 'Everything You Need to Start with AI', help: 'Hero ke upar chhota badge text.', },
+  { section: 'hero', group: 'hero', key: 'hero_headline_line_1', label: 'Hero Headline Line 1', defaultValue: '10K+ Prompts +', help: 'Hero headline ki first line.', },
+  { section: 'hero', group: 'hero', key: 'hero_headline_line_2', label: 'Hero Headline Line 2', defaultValue: 'AI Agent Course', help: 'Animated/colorful middle line.', },
+  { section: 'hero', group: 'hero', key: 'hero_headline_line_3', label: 'Hero Headline Line 3', defaultValue: '+ Creation Bundle', help: 'Hero headline ki third line.', },
+  { section: 'hero', group: 'hero', key: 'hero_highlight', label: 'Hero Highlight Text', defaultValue: 'No Experience Needed', help: 'Headline ke niche yellow/highlight line.', },
+  { section: 'hero', group: 'hero', key: 'hero_description', label: 'Hero Description', defaultValue: 'Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.', help: 'Hero paragraph text.', },
+  { section: 'hero', group: 'hero', key: 'hero_tools', label: 'Hero AI Tool Chips', defaultValue: 'Gemini, Midjourney, Sora, DALL-E, Leonardo, Google Flow, HeyGen, InVideo, Claude AI, GPT', help: 'Comma separated tool names.', },
+  { section: 'hero', group: 'hero', key: 'hero_image_url', label: 'Hero Image URL', defaultValue: '/cineforge-ai-bundle.png', help: 'Hero right side image URL. Direct image URL ya uploaded media URL paste karo.', },
+  { section: 'hero', group: 'hero', key: 'hero_image_alt', label: 'Hero Image Alt Text', defaultValue: 'CineForge AI 10 hajar prompt bundle and AI agent course', help: 'Image SEO/accessibility text.', },
+  { section: 'hero', group: 'hero', key: 'hero_price_text', label: 'Hero Image Price Text', defaultValue: 'Rs.199 Only', help: 'Hero image overlay price text.', },
+  { section: 'hero', group: 'hero', key: 'hero_image_caption', label: 'Hero Image Caption', defaultValue: '10 Hajar+ prompts, AI course and bonuses', help: 'Hero image overlay caption.', },
+  { section: 'hero', group: 'hero', key: 'hero_primary_cta', label: 'Primary Button Text', defaultValue: 'Get Full Bundle', help: 'Main CTA button text.', },
+  { section: 'hero', group: 'hero', key: 'hero_secondary_cta', label: 'Secondary Button Text', defaultValue: 'View Prompt Sets', help: 'Second CTA button text.', },
   { section: 'payment', group: 'product', key: 'name', label: 'Product Name', defaultValue: 'CineForge AI Prompt Bundle', help: 'Checkout aur tracking me product name.', },
   { section: 'payment', group: 'product', key: 'price', label: 'Main Price', defaultValue: '199', help: 'Main product price Rs.199.', },
   { section: 'payment', group: 'product', key: 'offer_bump_1_price', label: 'Bump 1 Price', defaultValue: '149', help: '100,000 ChatGPT prompts bump price.', },
@@ -52,6 +65,7 @@ export default function AdminSettingsPage() {
   const [debug, setDebug] = useState<Record<string, { status?: string; firedAt?: string; path?: string }>>({});
 
   const sections = useMemo(() => ({
+    hero: fields.filter((field) => field.section === 'hero'),
     payment: fields.filter((field) => field.section === 'payment'),
     tracking: fields.filter((field) => field.section === 'tracking'),
     thank_you: fields.filter((field) => field.section === 'thank_you')
@@ -137,7 +151,7 @@ export default function AdminSettingsPage() {
       });
       if (response.status === 401 || response.status === 403) throw new Error('Session expired. Please admin login dobara karo.');
       if (!response.ok) throw new Error('Save failed. Login ya permissions check karo.');
-      setMessage(section === 'payment' ? 'Payment links aur bumps saved.' : section === 'tracking' ? 'Tracking settings saved.' : 'Thank-you content saved.');
+      setMessage(section === 'hero' ? 'Hero section saved.' : section === 'payment' ? 'Payment links aur bumps saved.' : section === 'tracking' ? 'Tracking settings saved.' : 'Thank-you content saved.');
       await load();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Save failed.');
@@ -191,6 +205,21 @@ export default function AdminSettingsPage() {
             {message.includes('Session expired') ? <a href="/admin/login" className="ml-3 underline">Login</a> : null}
           </div>
         ) : null}
+
+        <section id="hero" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-black">Hero Section Editor</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">Landing page ke first screen ka text, AI chips, image aur buttons yahan se change honge.</p>
+            </div>
+            <button onClick={() => saveSection('hero')} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0f172a] px-5 py-3 font-black text-white disabled:opacity-60">
+              <Save size={17} /> Save Hero Section
+            </button>
+          </div>
+          <div className="mt-5 grid gap-4">
+            {sections.hero.map(fieldInput)}
+          </div>
+        </section>
 
         <section id="checkout" className="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

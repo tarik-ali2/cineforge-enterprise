@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, PlayCircle, Sparkles, Timer, Video } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { API_URL } from '@/lib/api';
 import { track } from '@/lib/tracking';
@@ -88,6 +87,22 @@ const marketPromptCards = [
 
 const FALLBACK_IMAGE = '/cineforge-ai-bundle.png';
 
+const defaultHero = {
+  badge: 'Everything You Need to Start with AI',
+  headlineLine1: '10K+ Prompts +',
+  headlineLine2: 'AI Agent Course',
+  headlineLine3: '+ Creation Bundle',
+  highlight: 'No Experience Needed',
+  description: 'Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.',
+  tools: tools.join(', '),
+  imageUrl: FALLBACK_IMAGE,
+  imageAlt: 'CineForge AI 10 hajar prompt bundle and AI agent course',
+  priceText: 'Rs.199 Only',
+  imageCaption: '10 Hajar+ prompts, AI course and bonuses',
+  primaryCta: 'Get Full Bundle',
+  secondaryCta: 'View Prompt Sets'
+};
+
 type PublicCard = {
   _id: string;
   sectionKey: string;
@@ -172,15 +187,45 @@ export function LandingPage() {
   const primaryVideos = useCarousel();
   const imageCarousel = useCarousel();
   const [cmsCards, setCmsCards] = useState<PublicCard[]>([]);
+  const [settings, setSettings] = useState<Record<string, unknown>>({});
 
   useEffect(() => {
     fetch(`${API_URL}/api/public/landing`, { cache: 'no-store' })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
         if (Array.isArray(data?.cards)) setCmsCards(data.cards);
+        if (data?.settings && typeof data.settings === 'object') setSettings(data.settings);
       })
       .catch(() => undefined);
   }, []);
+
+  const hero = useMemo(() => {
+    const getSetting = (key: string, fallback: string) => {
+      const value = settings[key];
+      return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+    };
+
+    const heroTools = getSetting('hero_tools', defaultHero.tools)
+      .split(',')
+      .map((tool) => tool.trim())
+      .filter(Boolean);
+
+    return {
+      badge: getSetting('hero_badge', defaultHero.badge),
+      headlineLine1: getSetting('hero_headline_line_1', defaultHero.headlineLine1),
+      headlineLine2: getSetting('hero_headline_line_2', defaultHero.headlineLine2),
+      headlineLine3: getSetting('hero_headline_line_3', defaultHero.headlineLine3),
+      highlight: getSetting('hero_highlight', defaultHero.highlight),
+      description: getSetting('hero_description', defaultHero.description),
+      tools: heroTools.length ? heroTools : tools,
+      imageUrl: normalizeImageUrl(getSetting('hero_image_url', defaultHero.imageUrl)),
+      imageAlt: getSetting('hero_image_alt', defaultHero.imageAlt),
+      priceText: getSetting('hero_price_text', defaultHero.priceText),
+      imageCaption: getSetting('hero_image_caption', defaultHero.imageCaption),
+      primaryCta: getSetting('hero_primary_cta', defaultHero.primaryCta),
+      secondaryCta: getSetting('hero_secondary_cta', defaultHero.secondaryCta)
+    };
+  }, [settings]);
 
   const dynamicShowcaseVideos = useMemo(() => {
     const editableCards = cmsCards.filter((card) => card.sectionKey === 'showcase_videos' && card.videoUrl && Number(card.sortOrder) >= 1 && Number(card.sortOrder) <= 8);
@@ -222,43 +267,43 @@ export function LandingPage() {
       <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 pb-12 pt-8 lg:grid-cols-[1.1fr_.9fr]">
         <div>
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mb-4 inline-flex rounded-full border border-cyan/40 bg-white/8 px-4 py-2 text-sm font-bold text-cyan">
-            Everything You Need to Start with AI
+            {hero.badge}
           </motion.p>
           <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: .08 }} className="max-w-4xl text-5xl font-black leading-[0.95] md:text-7xl">
-            <span className="text-shine">10K+ Prompts +</span><br />
+            <span className="text-shine">{hero.headlineLine1}</span><br />
             <span className="inline-block animate-[heroPulse_3.2s_ease-in-out_infinite] bg-gradient-to-r from-neon via-cyan to-magenta bg-clip-text text-transparent">
-              AI Agent Course
+              {hero.headlineLine2}
             </span><br />
-            <span className="text-white">+ Creation Bundle</span>
+            <span className="text-white">{hero.headlineLine3}</span>
           </motion.h1>
           <p className="mt-6 max-w-2xl text-xl font-black leading-8 text-neon">
-            No Experience Needed
+            {hero.highlight}
           </p>
           <p className="mt-3 max-w-2xl text-lg leading-8 text-white/74">
-            Gemini, Midjourney, Sora, DALL-E, Leonardo aur almost har AI tool ke liye ready-to-copy prompt categories plus recorded AI course. Creators, agencies, freelancers aur business owners ke liye practical prompt system.
+            {hero.description}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            {tools.map((tool, index) => (
-              <span key={tool} className={`rounded-full border bg-gradient-to-br px-5 py-2.5 text-sm font-black shadow-[inset_0_1px_0_rgba(255,255,255,.32),0_16px_38px_rgba(0,0,0,.32)] ${toolStyles[index]}`}>
+            {hero.tools.map((tool, index) => (
+              <span key={`${tool}-${index}`} className={`rounded-full border bg-gradient-to-br px-5 py-2.5 text-sm font-black shadow-[inset_0_1px_0_rgba(255,255,255,.32),0_16px_38px_rgba(0,0,0,.32)] ${toolStyles[index % toolStyles.length]}`}>
                 {tool}
               </span>
             ))}
           </div>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <a onClick={() => track('initiate_checkout', { source: 'hero_buy', value: 199, currency: 'INR', productName: 'CineForge AI Prompt Bundle' })} href="/checkout" className="inline-flex items-center justify-center gap-2 rounded-full bg-neon px-7 py-4 font-black text-ink">
-              Get Full Bundle <ArrowRight size={18} />
+              {hero.primaryCta} <ArrowRight size={18} />
             </a>
             <a href="#vault" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-7 py-4 font-bold text-white">
-              View Prompt Sets
+              {hero.secondaryCta}
             </a>
           </div>
         </div>
         <div className="rounded-[2rem] border border-white/15 bg-white/8 p-4 shadow-glow">
           <div className="relative aspect-square overflow-hidden rounded-[1.5rem] bg-[radial-gradient(circle_at_top,#2448ff,transparent_35%),linear-gradient(135deg,#0a102b,#201044)]">
-            <Image src="/cineforge-ai-bundle.png" alt="CineForge AI 10 hajar prompt bundle and AI agent course" fill priority className="object-cover" />
+            <CmsImage src={hero.imageUrl} alt={hero.imageAlt} className="h-full w-full object-cover" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-neon/30 bg-black/68 p-4 backdrop-blur">
-              <p className="text-2xl font-black text-neon">Rs.199 Only</p>
-              <p className="text-sm font-bold text-white/75">10 Hajar+ prompts, AI course and bonuses</p>
+              <p className="text-2xl font-black text-neon">{hero.priceText}</p>
+              <p className="text-sm font-bold text-white/75">{hero.imageCaption}</p>
             </div>
           </div>
         </div>
