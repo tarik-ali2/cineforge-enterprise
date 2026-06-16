@@ -1,7 +1,8 @@
 import { AdminNav } from '@/components/AdminNav';
-import { BarChart3, FileText, Image, Lock, Megaphone, Search, Settings, ShoppingCart, Video } from 'lucide-react';
+import { BarChart3, FileText, Image, Lock, Megaphone, Search, Settings, ShoppingCart, Sparkles, Video } from 'lucide-react';
 
 const modules = [
+  { title: 'Hero Section', desc: 'First screen headline, AI chips, hero image, price text and CTA buttons.', icon: Sparkles, href: '/admin/settings#hero' },
   { title: 'Landing CMS', desc: 'Hero text, CTA, prompt cards, testimonials and page sections.', icon: FileText, href: '/admin/content' },
   { title: 'Media Library', desc: 'Upload images, video links, card names and recommended sizes.', icon: Image, href: '/admin/content' },
   { title: 'Video Courses', desc: 'Recorded class cards, course bundles and carousel content.', icon: Video, href: '/admin/content' },
@@ -27,7 +28,10 @@ export default function AdminDashboardPage() {
               Landing page, checkout, tracking aur content ko ek jagah se manage karo.
             </p>
           </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <a href="/admin/settings#hero" className="rounded-xl bg-cyan px-5 py-4 text-center font-black text-ink transition hover:scale-[1.01]">
+              Edit Hero Section
+            </a>
             <a href="/admin/content" className="rounded-xl bg-neon px-5 py-4 text-center font-black text-ink transition hover:scale-[1.01]">
               Edit Website Content
             </a>

@@ -1,9 +1,10 @@
 'use client';
 
-import { ArrowLeft, BarChart3, CreditCard, ExternalLink, Gauge, Images, LogOut, Megaphone, Settings } from 'lucide-react';
+import { ArrowLeft, BarChart3, CreditCard, ExternalLink, Gauge, Images, LogOut, Megaphone, Settings, Sparkles } from 'lucide-react';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: Gauge },
+  { label: 'Hero Editor', href: '/admin/settings#hero', icon: Sparkles },
   { label: 'Cards & Media', href: '/admin/content', icon: Images },
   { label: 'Checkout Offers', href: '/admin/settings#checkout', icon: CreditCard },
   { label: 'GTM & Tracking', href: '/admin/settings#tracking', icon: Megaphone },
@@ -55,6 +56,9 @@ export function AdminNav() {
           </a>
           <a href="/admin/content" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
             <Images size={16} /> Content
+          </a>
+          <a href="/admin/settings#hero" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
+            <Sparkles size={16} /> Hero
           </a>
           <a href="/admin/settings" className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-sm font-bold text-white/85 transition hover:border-cyan hover:bg-cyan/10 hover:text-cyan">
             <Settings size={16} /> Settings
